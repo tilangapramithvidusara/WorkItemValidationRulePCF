@@ -36,6 +36,10 @@
       <css path="css/WorkItemValidationRule.css" order="1" />
       <resx path="strings/WorkItemValidationRule.1033.resx" version="1.0.0" />
       -->
+      <css path="src/css/ValidationRules.css" order="1" />
+       <!-- <img path="images/delete.png"  />
+      <img path="images/shrink.png"  />
+      <img path="images/expand.png"  /> -->
     </resources>
     <!-- UNCOMMENT TO ENABLE THE SPECIFIED API
     <feature-usage>

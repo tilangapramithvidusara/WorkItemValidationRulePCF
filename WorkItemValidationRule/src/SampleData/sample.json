@@ -1,0 +1,100 @@
+[ 
+    {
+        "level1" : {
+            "fields": [{
+                "field": "Question01",
+                "condition": "",
+                "value": "",
+                "sort": 1,
+                "level": 1,
+                "hasNested": true,
+                "expression": "OR",
+                "innerConditions":[
+                        {
+                            "field":  "Question 01 01",
+                            "condition": "",
+                            "value": "",
+                            "sort": 1,
+                            "level": 11,
+                            "hasNested": true,
+                            "expression": "AND",
+                            "innerConditions": [
+                                {
+                                    "field": "Question 01 01 01",
+                                    "condition": "",
+                                    "value": "",
+                                    "sort": 1,
+                                    "hasNested": false,
+                                    "level": 111,
+                                    "expression": ""
+                                },
+                                {
+                                    "field": "Question 01 01 02",
+                                    "condition": "",
+                                    "value": "",
+                                    "sort": 1,
+                                    "level": 112,
+                                    "expression": "AND"
+                                },
+                                {
+                                    "field": "Question 01 01 03",
+                                    "condition": "",
+                                    "value": "",
+                                    "sort": 1,
+                                    "level": 113,
+                                    "hasNested": true,
+                                    "expression": "OR",
+                                    "innerConditions": [{
+                                        "field": "Question 01 01 03 01",
+                                        "condition": "",
+                                        "value": "",
+                                        "sort": 1,
+                                        "level": 1131
+                                    }]
+                                }
+                        ]
+                    }
+                ] 
+            }],
+            "actions": [
+                        {
+                            "checkBoxValues": [{
+                                "show":{
+                                    "logicalName": "Show",
+                                    "value": "show"
+                                },
+                                "outputDoc": {
+                                    "logicalName": "outputDoc",
+                                    "value": "outputDoc"
+                                },
+                                "enable": {
+                                    "logicalName": "EnableField",
+                                    "value": "enable"
+                                }
+                            }],
+                            "minMax": {
+                                "logicalName": "minMax",
+                                "min":12,
+                                "max": 21
+                            }
+                        }
+                ]
+        }
+    },
+    {
+        "level2": {
+            "fields":[{
+                "field": "Question 02",
+                "condition": "",
+                "value": "",
+                "sort": 1,
+                "level": 2,
+                "hasNested": false,
+                "expression": "AND"
+            }],
+            "actions": ["ShowOutputDoc"]
+    }
+}
+]
+
+
