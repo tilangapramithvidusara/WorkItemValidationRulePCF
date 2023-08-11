@@ -16,7 +16,7 @@ export const dbConstants = {
   common: {
     gyde_validationrule: "gyde_validationrule",
     gyde_visibilityrule: "gyde_visibilityrule",
-    statusCode: "statusCode"
+    statusCode: "statuscode"
   },
   questionTypes: {
     numericQuestion: "Numeric",

@@ -49,7 +49,6 @@ interface TableRowProps {
   _nestedRows: any;
   questionList: any;
   handleSectionRemove: any;
-  setSaveAsIsNested: any;
   imageUrls: any;
   suerveyIsPublished: any
 }
@@ -76,7 +75,6 @@ const RowContainer: React.FC<TableRowProps> = ({
   _nestedRows,
   questionList,
   handleSectionRemove,
-  setSaveAsIsNested,
   imageUrls,
   suerveyIsPublished
 }) => {

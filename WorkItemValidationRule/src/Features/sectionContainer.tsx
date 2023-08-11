@@ -34,7 +34,6 @@ interface SectionProps {
   questionList: any;
   setValidation: any;
   setDeleteSectionKey: any;
-  setSaveAsIsNested: any;
   imageUrls: any;
   suerveyIsPublished: any
 }
@@ -50,7 +49,6 @@ function SectionContainer({
   questionList,
   setValidation,
   setDeleteSectionKey,
-  setSaveAsIsNested,
   imageUrls,
   suerveyIsPublished
 }: SectionProps) {
@@ -120,7 +118,6 @@ function SectionContainer({
           _nestedRows={_nestedRows}
           questionList={questionList}
           handleSectionRemove={handleSectionRemove}
-          setSaveAsIsNested={setSaveAsIsNested}
           imageUrls={imageUrls}
           suerveyIsPublished={suerveyIsPublished}
         />

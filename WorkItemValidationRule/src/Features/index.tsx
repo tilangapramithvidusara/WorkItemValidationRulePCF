@@ -1,22 +1,13 @@
 import React, { useEffect, useState } from "react";
-import configs from "../configs/actionMapper";
-import toggleWithCheckboxMapper from "../configs/toggleWithCheckboxMapper";
 import {
   convertJSONFormatToDBFormat,
-  convertMinMaxDBFormatToJSON,
   findAndUpdateLastNestedIf,
-  removeIfKeyAndGetDbProperty,
-  removeMinMaxIfKeyAndGetDbProperty,
-} from "../Utils/logics.utils";
-import sampleOutputData from "../SampleData/SampleOutputData";
-import utilHelper from "../utilHelper/utilHelper";
-// import removeIcon from '../assets/delete.png';
+  removeIfKeyAndGetDbProperty
+} from "../Utils/logics.utils";;
 import { Button, notification, Space, Spin } from "antd";
 import SectionContainer from "./sectionContainer";
 import {
-  updateDataRequest,
   getCurrentState,
-  getCurrentId,
   fetchRequest,
   saveRequest,
   loadAllQuestionsInSurvey,
@@ -25,7 +16,6 @@ import {
 import { dbConstants } from "../constants/dbConstants";
 import { normalConverter } from "../Utils/dbFormatToJson";
 import { hasNullFields } from "../Utils/utilsHelper";
-// import NotificationPopup from "../Components/NotificationPopup";
 
 const ParentComponent = ({
   imageUrl,
@@ -65,7 +55,6 @@ const ParentComponent = ({
     andOrValidation: true,
     nestingLevelValidation: true,
   });
-  const [saveAsIsNested, setSaveAsIsNested] = useState<boolean>(false);
   const [suerveyIsPublished, setSuerveyIsPublished] = useState<boolean>(false);
 
   let addNestedComponent = () => {
@@ -79,7 +68,6 @@ const ParentComponent = ({
       },
     ]);
     setIsNested(true);
-    setSaveAsIsNested(true);
   };
 
   let addComponent = () => {
@@ -540,7 +528,6 @@ const ParentComponent = ({
                       questionList={questionList}
                       setValidation={setValidation}
                       setDeleteSectionKey={setDeleteSectionKey}
-                      setSaveAsIsNested={setSaveAsIsNested}
                       imageUrls={{ imageUrl, imageUrl1, imageUrl2 }}
                       suerveyIsPublished={suerveyIsPublished}
                     />
