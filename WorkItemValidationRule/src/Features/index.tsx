@@ -3,7 +3,7 @@ import {
   convertJSONFormatToDBFormat,
   findAndUpdateLastNestedIf,
   removeIfKeyAndGetDbProperty
-} from "../Utils/logics.utils";;
+} from "../Utils/logics.utils";
 import { Button, notification, Space, Spin } from "antd";
 import SectionContainer from "./sectionContainer";
 import {
@@ -338,40 +338,47 @@ const ParentComponent = ({
     }
 
     //test
-    _setVisibilityRulePrev((prevValue) => [
+    // _setVisibilityRulePrev((prevValue) => [
+    //   ...prevValue,
+    //   {
+    //     visibility:
+    //     {"or" : [
+    //       {"and" : [
+    //         {"==": [{ var: "FSCM_PL_INV_001"}, "Y"]},
+    //         {"==": [{ var: "FSCM_PL_INV_007"}, "Two"]},
+    //         {"==": [{ var: "FSCM_PL_INV_010"}, "AMT"]},
+    //       ]},
+    //       {"and" : [
+    //         {"==": [{ var: "FSCM_PL_INV_001"}, "Y"]},
+    //         {"==": [{ var: "FSCM_PL_INV_007"}, "Three"]},
+    //         {"==": [{ var: "FSCM_PL_INV_010"}, "AMT"]},
+    //       ]},
+    //       {"and" : [
+    //         {"==": [{ var: "FSCM_PL_INV_001"}, "Y"]},
+    //         {"==": [{ var: "FSCM_PL_INV_007"}, "Two"]},
+    //         {"==": [{ var: "FSCM_PL_INV_010"}, "AP"]},
+    //       ]},
+    //       {"and" : [
+    //         {"==": [{ var: "FSCM_PL_INV_001"}, "Y"]},
+    //         {"==": [{ var: "FSCM_PL_INV_007"}, "Three"]},
+    //         { "==": [{ var: "FSCM_PL_INV_010" }, "AP"] },
+    //         {
+    //           "or": [{"==": [{ var: "FSCM_PL_INV_001"}, "Y"]}]
+    //         }
+    //       ]
+          
+    //       }
+    //       ]}
+    //   }
+    // ])
+
+      _setVisibilityRulePrev((prevValue) => [
       ...prevValue,
       {
-        visibility:
-        {"or" : [
-          {"and" : [
-            {"==": [{ var: "FSCM_PL_INV_001"}, "Y"]},
-            {"==": [{ var: "FSCM_PL_INV_007"}, "Two"]},
-            {"==": [{ var: "FSCM_PL_INV_010"}, "AMT"]},
-          ]},
-          {"and" : [
-            {"==": [{ var: "FSCM_PL_INV_001"}, "Y"]},
-            {"==": [{ var: "FSCM_PL_INV_007"}, "Three"]},
-            {"==": [{ var: "FSCM_PL_INV_010"}, "AMT"]},
-          ]},
-          {"and" : [
-            {"==": [{ var: "FSCM_PL_INV_001"}, "Y"]},
-            {"==": [{ var: "FSCM_PL_INV_007"}, "Two"]},
-            {"==": [{ var: "FSCM_PL_INV_010"}, "AP"]},
-          ]},
-          {"and" : [
-            {"==": [{ var: "FSCM_PL_INV_001"}, "Y"]},
-            {"==": [{ var: "FSCM_PL_INV_007"}, "Three"]},
-            { "==": [{ var: "FSCM_PL_INV_010" }, "AP"] },
-            {
-              "or": [{"==": [{ var: "FSCM_PL_INV_001"}, "Y"]}]
-            }
-          ]
-          
-          }
-          ]}
+        visibility: { "and": [ { "if": [ { "var": "NTemp_C01_s01_gdRD" }, true, false ] },  { "if": [ { "==": [ { "var": "NTemp_C01_s01_rd333" }, "1223333222" ] } ] }, { "if": [ { "==": [ { "var": "NTemp_C01_s01_rd" }, "122222" ] } ] } ] }
       }
-    ])
-   };
+    ]) 
+  };
   const getCurrentPublishedStatus = async () => {
     const { data = null } = await getPublishedStatus(currentPossitionDetails);
     console.log("Published Status", data);
@@ -463,31 +470,24 @@ const ParentComponent = ({
         openNotificationWithIcon("error", "Fields cannot be empty!");
         return;
       }
-      const _visibility = convertJSONFormatToDBFormat(sec[key], true);
+      const _visibility : any = convertJSONFormatToDBFormat(sec[key], true);
+      console.log("_visibility", _visibility);
       visibilityRuleNormal.push(_visibility);
-      visibilityRule = findAndUpdateLastNestedIf(
-        visibilityRule,
-        { if: [_visibility] },
-        false
-      );
+      // visibilityRule = findAndUpdateLastNestedIf(
+      //   visibilityRule,
+      //   { if: [_visibility] },
+      //   false
+      // );
     });
     let savedVisibilityRuleFinalFormat: any = [];
       if (
-        visibilityRuleNormal.length > 0 &&
-        Object.keys(visibilityRuleNormal[0])[0] === ""
+        visibilityRuleNormal.length === 1
       ) {
-        savedVisibilityRuleFinalFormat = {
-          if: visibilityRuleNormal
-        };
-
-      } else {
-        savedVisibilityRuleFinalFormat = {
-          if: [
-            {
-              or: visibilityRuleNormal,
-            },
-          ]
-        };
+        if (visibilityRuleNormal[0][""] && visibilityRuleNormal[0][""][0]) {
+          savedVisibilityRuleFinalFormat = visibilityRuleNormal[0][""][0]
+        } else {
+          savedVisibilityRuleFinalFormat = visibilityRuleNormal[0]
+        }
       }
     console.log(
       "savedVisibilityRuleFinalFormat",

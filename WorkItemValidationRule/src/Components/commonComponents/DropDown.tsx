@@ -44,6 +44,15 @@ interface DropDownCommonProps {
   }
 ]
 const DropDown: React.FC<DropDownCommonProps> = ({ dropDownData, isDisabled, setExpression, changedId, fieldName, selectedValue }) => {
+
+  useEffect(() => {
+    console.log("selectedValue === 'con'", selectedValue)
+  }, [selectedValue])
+
+  const onChangeEvent = (option: any) => {
+    setExpression({ input: option.value, changedId, fieldName })
+    // if(selectedValue === 'con') setExpression({ input: "" , changedId, fieldName: "value" })
+  }
   return (
     <div>
       <Select
@@ -59,7 +68,7 @@ const DropDown: React.FC<DropDownCommonProps> = ({ dropDownData, isDisabled, set
         }
         options={dropDownData}
         disabled={isDisabled ? isDisabled : false}
-        onChange={(input, option) => setExpression({ input: option.value, changedId, fieldName })}
+        onChange={(input, option) => onChangeEvent(option)}
         value={selectedValue}
       />
     </div>
@@ -67,3 +76,24 @@ const DropDown: React.FC<DropDownCommonProps> = ({ dropDownData, isDisabled, set
 };
 
 export default DropDown;
+
+[
+  {
+      "": [
+          [
+              {
+                  "if": [
+                      {
+                          "==": [
+                              {
+                                  "var": "NTemp_C01_04_Q_04"
+                              },
+                              "2023-08-24"
+                          ]
+                      }
+                  ]
+              }
+          ]
+      ]
+  }
+]

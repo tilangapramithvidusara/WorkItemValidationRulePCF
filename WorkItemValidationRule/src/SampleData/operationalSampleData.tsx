@@ -1,7 +1,13 @@
 
 export const operationalSampleData: any[] = [{
     options: [
-        { label: "Contains", value: "==" }
+        { label: "EqualTo", value: "==" },
+        { label: "GreaterThan", value: ">" },
+        { label: "LessThan", value: "<" },
+        { label: "GreaterThanEqualTo", value: ">=" }, 
+        { label: "LessThanEqualTo", value: "<=" },
+        { label: "NotEqualTo", value: "!=" },
+        { label: "Contains", value: "con" }
     ],
 }];
 

@@ -14,33 +14,42 @@ const convertFunc = (sampleArr: any[], level = 1) => {
 
   if (nestedParents && nestedParents.length) {
     nestedParents.forEach((x: any) => {
+      console.log("xxxxx", x)
+
       const nestedLevelParents = Object.keys(x)[0];
-      const equalOperators = x[nestedLevelParents].filter((x: {}) => Object.keys(x)[0] === '==' || Object.keys(x)[0] === 'eq' || Object.keys(x)[0] === '>'|| Object.keys(x)[0] === 'gt' || Object.keys(x)[0] === '>='|| Object.keys(x)[0] === 'gte' || Object.keys(x)[0] === '<'|| Object.keys(x)[0] === 'lt' || Object.keys(x)[0] === '<='|| Object.keys(x)[0] === 'lte');
-      const andOrOperators = x[nestedLevelParents].filter((x: {}) => Object.keys(x)[0] === 'and' || Object.keys(x)[0] === 'or');
-        console.log("")
-      x[nestedLevelParents] = equalOperators.map((prnt: { [x: string]: any[]; }) => ({
-        field: prnt["=="] ? prnt["=="][0].var : prnt[">"] ? prnt[">"][0].var : prnt[">="] ? prnt[">="][0].var :  prnt["<"] ? prnt["<"][0].var : prnt["<="] ? prnt["<="][0].var : prnt.eq[0].var,
-          condition: Object.keys(prnt)[0] === 'eq' ?
-              "==" : Object.keys(prnt)[0] === 'gt' ?
-                  '>' : Object.keys(prnt)[0] === 'gte' ?
-                      '>=' : Object.keys(prnt)[0] === 'lt' ?
-                          '<' : Object.keys(prnt)[0] === 'lte' ?
-                              '<=' : Object.keys(prnt)[0],
-        value: prnt["=="] ? prnt["=="][1] : prnt[">"] ? prnt[">"][1] : prnt[">="] ? prnt[">="][1] :  prnt["<"] ? prnt["<"][1] :  prnt["<="] ? prnt["<="][1] : prnt.eq[1],
-        sort: 1,
-        level: level++,
-        expression: nestedLevelParents === 'and' || nestedLevelParents === 'AND' || nestedLevelParents === '&&' ? '&&' : "||",
-        innerConditions: [],
-        hasNested: false,
-      }));
+      console.log("nestedLevelParents", nestedLevelParents)
+      const equalOperators = x[nestedLevelParents].filter((x:any) => Object.keys(x?.if[0])[0]=== '==' || Object.keys(x?.if[0])[0] === 'eq' || Object.keys(x?.if[0])[0] === '>'|| Object.keys(x?.if[0])[0] === 'gt' || Object.keys(x?.if[0])[0] === '>='|| Object.keys(x?.if[0])[0] === 'gte' || Object.keys(x?.if[0])[0]=== '<'|| Object.keys(x?.if[0])[0] === 'lt' || Object.keys(x?.if[0])[0] === '<='|| Object.keys(x?.if[0])[0] === 'lte' || typeof x?.if[0] === 'object');
+      // const andOrOperators = x[nestedLevelParents].filter((x: {}) => Object.keys(x)[0] === 'and' || Object.keys(x)[0] === 'or');
+      x[nestedLevelParents] = equalOperators.map((prnt: { [x: string]: any[]; }) => {
+        console.log("Field Looping ", prnt?.if)
 
-      if (andOrOperators.length > 0) {
-        x[nestedLevelParents][x[nestedLevelParents].length - 1].hasNested = true
-        x[nestedLevelParents][x[nestedLevelParents].length - 1].innerConditions = andOrOperators;
+        console.log("Object.keys(x?.if[0])[0]", Object.keys(prnt?.if[0])[0])
+        return {
+          field: prnt["if"][0]["=="] ? prnt["if"][0]["=="][0].var : prnt["if"][0][">"] ? prnt["if"][0][">"][0].var : prnt["if"][0][">="] ? prnt["if"][0][">="][0].var : prnt["if"][0]["<"] ? prnt["if"][0]["<"][0].var : prnt["if"][0]["<="] ? prnt["<="][0].var : prnt["if"][0]["con"] ? prnt["con"][1] : prnt?.if[0]?.var,
+          condition:
+          prnt?.if?.length === 3 ? "con": 
+            Object.keys(prnt?.if[0])[0] === '==' ?
+            "==" : Object.keys(prnt?.if[0])[0] === '>' ?
+              '>' : Object.keys(prnt?.if[0])[0] === '>=' ?
+                '>=' : Object.keys(prnt?.if[0])[0] === '<' ?
+                  '<' : Object.keys(prnt?.if[0])[0] === '<=' ? 
+                    '<=' : Object.keys(prnt?.if[0])[0],
+          value: prnt?.if?.length === 3 ? "" : prnt["if"][0]["=="][1] ? prnt["if"][0]["=="][1] : prnt["if"][0][">"][1] ? prnt["if"][0][">"][1] : prnt["if"][0][">="][1] ? prnt["if"][0][">="][1] : prnt["if"][0]["<"][1] ? prnt["if"][0]["<"][1] : prnt["if"][0]["<="][1] ? prnt["if"][0]["<="][1] : prnt["if"][0]["con"][1],
+          sort: 1,
+          level: level++,
+          expression: nestedLevelParents === 'and' || nestedLevelParents === 'AND' || nestedLevelParents === '&&' ? '&&' : "||",
+          innerConditions: [],
+          hasNested: false,
+        }
+      });
 
-        console.log("andOrOperators", andOrOperators)
-        convertFunc(x[nestedLevelParents][x[nestedLevelParents].length - 1].innerConditions, level);
-      }
+      // if (andOrOperators.length > 0) {
+      //   x[nestedLevelParents][x[nestedLevelParents].length - 1].hasNested = true
+      //   x[nestedLevelParents][x[nestedLevelParents].length - 1].innerConditions = andOrOperators;
+
+      //   console.log("andOrOperators", andOrOperators)
+      //   convertFunc(x[nestedLevelParents][x[nestedLevelParents].length - 1].innerConditions, level);
+      // }
     });
     return nestedParents;
   }

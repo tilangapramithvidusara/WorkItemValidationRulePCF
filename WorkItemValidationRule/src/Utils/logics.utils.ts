@@ -210,54 +210,30 @@ const convertJSONFormatToDBFormat = (
 
     switch (conditionObj.condition) {
       case "==":
-        visibilityRuleOverride
-          ? (condition = {
-              "==": [{ var: conditionObj.field }, conditionObj.value],
-            })
-          : (condition = {
-              eq: [{ var: conditionObj.field }, conditionObj.value],
-            });
+        condition = 
+          { "if": [{ "==": [{ var: conditionObj.field }, conditionObj.value] }] }
         break;
       case "<":
-        visibilityRuleOverride
-          ? (condition = {
-              "<": [{ var: conditionObj.field }, conditionObj.value],
-            })
-          : (condition = {
-              lt: [{ var: conditionObj.field }, conditionObj.value],
-            });
-
+        condition = 
+          { "if": [{ "<": [{ var: conditionObj.field }, conditionObj.value] }] }
         break;
       case "<=":
-        visibilityRuleOverride
-          ? (condition = {
-              "<=": [{ var: conditionObj.field }, conditionObj.value],
-            })
-          : (condition = {
-              lte: [{ var: conditionObj.field }, conditionObj.value],
-            });
+        condition = 
+          { "if": [{ "<=": [{ var: conditionObj.field }, conditionObj.value] }] }
         break;
-
       case ">":
-        visibilityRuleOverride
-          ? (condition = {
-              ">": [{ var: conditionObj.field }, conditionObj.value],
-            })
-          : (condition = {
-              gt: [{ var: conditionObj.field }, conditionObj.value],
-            });
-
+        condition = 
+          { "if": [{ ">": [{ var: conditionObj.field }, conditionObj.value] }] }
         break;
       case ">=":
-        visibilityRuleOverride
-          ? (condition = {
-              ">=": [{ var: conditionObj.field }, conditionObj.value],
-            })
-          : (condition = {
-              gte: [{ var: conditionObj.field }, conditionObj.value],
-            });
-
+        condition = 
+          { "if":[{">=": [{ var: conditionObj.field }, conditionObj.value] }] }
         break;
+        case "con":
+          condition = 
+            { "if": [{ var: conditionObj.field }, true, false] }
+            // [  { "var": " WIST_SCO_SSCO_001"},  true, false ]
+          break;
       default:
         condition = null;
         break;
@@ -265,29 +241,29 @@ const convertJSONFormatToDBFormat = (
     return condition;
   }
 
-  function buildInnerConditions(innerConditions: any): any {
-    let innerResult : any = [];
-    for (const innerCondition of innerConditions)  {
-      const condition = buildCondition(innerCondition);
-      // console.log("condition", innerCondition)
-      const exp = innerCondition?.innerConditions[1]?.expression
-      // console.log("condition exp", exp?.innerConditions[1]?.expression)
+  // function buildInnerConditions(innerConditions: any): any {
+  //   let innerResult : any = [];
+  //   for (const innerCondition of innerConditions)  {
+  //     const condition = buildCondition(innerCondition);
+  //     // console.log("condition", innerCondition)
+  //     const exp = innerCondition?.innerConditions[1]?.expression
+  //     // console.log("condition exp", exp?.innerConditions[1]?.expression)
 
-      if (condition) {
-        innerResult.push(condition);
-      }
-      if (
-        innerCondition?.hasNested &&
-        innerCondition?.innerConditions.length > 0
-      ) {
-        const nestedConditions = buildInnerConditions(
-          innerCondition.innerConditions
-        );
-        innerResult.push({ [exp === '&&' || exp === 'and' || exp === 'AND' ? 'and' : 'or']: nestedConditions });
-      }
-    }
-    return innerResult;
-  }
+  //     if (condition) {
+  //       innerResult.push(condition);
+  //     }
+  //     // if (
+  //     //   innerCondition?.hasNested &&
+  //     //   innerCondition?.innerConditions.length > 0
+  //     // ) {
+  //     //   const nestedConditions = buildInnerConditions(
+  //     //     innerCondition.innerConditions
+  //     //   );
+  //     //   innerResult.push({ [exp === '&&' || exp === 'and' || exp === 'AND' ? 'and' : 'or']: nestedConditions });
+  //     // }
+  //   }
+  //   return innerResult;
+  // }
 
 
   for (const conditionObj of arr) {
@@ -295,14 +271,14 @@ const convertJSONFormatToDBFormat = (
     if (condition) {
       result.push(condition);
     }
-    if (conditionObj.hasNested && conditionObj.innerConditions.length > 0) {
-      const nestedConditions = buildInnerConditions(
-        conditionObj.innerConditions
-      );
+    // if (conditionObj.hasNested && conditionObj.innerConditions.length > 0) {
+    //   const nestedConditions = buildInnerConditions(
+    //     conditionObj.innerConditions
+    //   );
       
-      const exp = conditionObj?.innerConditions[1]?.expression
-      result.push({ [exp === '&&' || exp === 'and' || exp === 'AND' ? 'and' : 'or']: nestedConditions });
-    }
+    //   const exp = conditionObj?.innerConditions[1]?.expression
+    //   result.push({ [exp === '&&' || exp === 'and' || exp === 'AND' ? 'and' : 'or']: nestedConditions });
+    // }
   }
 
   // return { "and": result };
