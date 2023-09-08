@@ -33,9 +33,10 @@ interface SectionProps {
   currentPossitionDetails: any;
   questionList: any;
   setValidation: any;
-  setDeleteSectionKey: any;
   imageUrls: any;
-  suerveyIsPublished: any
+  suerveyIsPublished: any;
+  handleSectionRemove: any;
+  setQuestionsForRelationship: any;
 }
 
 function SectionContainer({
@@ -48,9 +49,10 @@ function SectionContainer({
   currentPossitionDetails,
   questionList,
   setValidation,
-  setDeleteSectionKey,
   imageUrls,
-  suerveyIsPublished
+  suerveyIsPublished,
+  handleSectionRemove,
+  setQuestionsForRelationship
 }: SectionProps) {
   const [rowData, setRowData] = useState<any>();
   const [rows, setRows] = useState<Row[]>([
@@ -84,9 +86,7 @@ function SectionContainer({
     );
   };
 
-  const handleSectionRemove = () => {
-      setDeleteSectionKey(sectionLevel)
-  }
+
 
   useEffect(() => {
     let releatedFields = _nestedRows?.find((x: { [x: string]: any; }) => x[sectionLevel]);
@@ -120,6 +120,7 @@ function SectionContainer({
           handleSectionRemove={handleSectionRemove}
           imageUrls={imageUrls}
           suerveyIsPublished={suerveyIsPublished}
+          setQuestionsForRelationship={setQuestionsForRelationship}
         />
       ))}
     </div>

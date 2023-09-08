@@ -9,15 +9,13 @@ declare global {
   }
 }
 
-export const loadAllQuestionsInSurvey = async () => {
-  console.log('come');
+export const loadAllQuestionsInSurvey = async (surveyTemplateId: any) => {
   try {    
-    const templateID = await window.parent.Xrm.Page.ui._formContext.getAttribute("gyde_surveytemplate").getValue()[0].id.replace("{", "").replace("}", "");
-    console.log('template id =========> ', templateID);
-    const result = await window.parent.Xrm.WebApi.retrieveMultipleRecords("gyde_surveytemplatechaptersectionquestion", "?$select=gyde_name,gyde_answertype,gyde_shortname&$filter= _gyde_surveytemplate_value eq " + templateID);
+    // const templateID = await window.parent.Xrm.Page.ui._formContext.getAttribute("gyde_surveytemplate").getValue()[0].id.replace("{", "").replace("}", "");
+    console.log('template id =========> ', surveyTemplateId);
+    const result = await window.parent.Xrm.WebApi.retrieveMultipleRecords("gyde_surveytemplatechaptersectionquestion", "?$select=gyde_name,gyde_answertype,_gyde_surveytemplatechaptersection_value,gyde_shortname,gyde_internalid&$filter= _gyde_surveytemplate_value eq " + surveyTemplateId);
     console.log("result ===========> ", result);
     console.log('result.entities=====> ', questionArraySample);
-    
     return {
       error: false,
       data: result?.entities?.length > 0 ? result?.entities : []
@@ -63,11 +61,14 @@ export const getCurrentState = async () => {
   }
 }
 
-export const saveValidationRules = async(validationRuleData: object) => {
+export const getWorkItemId = async() => {
   try {
     const id = await window.parent.Xrm.Page.ui._formContext.data.entity.getId().replace("{", "").replace("}", "");
-    const currentEntity = await window.parent.Xrm.Page.ui._formContext.contextToken.entityTypeName;
-    console.log("validation rules data ===========> ", validationRuleData);
+    console.log("validation rules data ===========> ", id);
+    return {
+      error: false,
+      data: {id}
+    }
     
   } catch (error) {
     console.log("save error =========> ", error);
@@ -82,25 +83,8 @@ export const saveValidationRules = async(validationRuleData: object) => {
   ): Promise<any> => {
     try {
       let result = await window.parent.Xrm.WebApi.retrieveRecord(entityLogicalName, id, columnsNames);
-      let _result : any = {}
-      if (result?.gyde_validationrule) _result = result[dbConstants.question.gyde_minmaxvalidationrule];
-      else if(result?.gyde_visibilityrule) _result = result[dbConstants.common.gyde_visibilityrule];
-      // else if(result?.gyde_validationrule?.length) _result = result[dbConstants.common.gyde_validationrule];
-      else if (result?.gyde_documentoutputrule) _result = result[dbConstants.question.gyde_documentOutputRule];
-      // console.log("RESULTTT", _result)
-      // if (_result) {
-      //   _result = JSON.parse(_result)
-      //   if(!_result || !_result?.length) return { error: false, data: [], loading: false };
-      // }
-      console.log("fetch Result ..." , _result)
-      if (typeof _result === 'object') {
-        _result = {}
-      } else { 
-        _result = JSON.parse(_result);
-      }
-      
-  
-      return { error: false, data: _result, loading: false };
+      console.log("RESSSSS", result)
+      return { error: false, data: result?.gyde_creationrule ? result?.gyde_creationrule : {}, loading: false };
     } catch (error: any) {
       // handle error conditions
       console.log("error",error);
@@ -227,3 +211,154 @@ export const getPublishedStatus = async (currentPositionDetails: any) : Promise<
     return { error: true, data: {} }
   }
 }
+
+export const createRelationshipForWI = async (workitemId: any, updateRecordDetails: any): Promise<any> => {
+  try {
+    const updatedRecordResults: any[] = [];
+    const workitemDetails = await window.parent.Xrm.WebApi.retrieveRecord("gyde_surveyworkitem", workitemId);
+    console.log("workitemDetails", workitemDetails)
+    updateRecordDetails?.forEach(async (rcd: any) => {
+      let record: any = {};
+      record["gyde_surveyworkitem@odata.bind"] = `/gyde_surveyworkitems(${workitemId})`; // Lookup
+      record["gyde_relatedsurveyitemid"] = rcd?.internalId;
+      record["gyde_itemtype"] = "528670003";
+      record["gyde_isusedincreationrule"] = true
+      record["gyde_iscopydesignnotes"] = false
+      record["gyde_isincludeindevopsoutput"] = false
+      record["gyde_name"] = `${rcd?.value} - ${workitemDetails?.gyde_title}`
+
+      console.log("SAVED WI record", record)
+      const result = await window.parent.Xrm.WebApi.createRecord("gyde_surveyworkitemrelatedsurveyitem", record);
+      updatedRecordResults.push(result);
+      console.log("result workitem relationship", result)
+    });
+    return { error: false, data: updatedRecordResults }
+
+  } catch (e) {
+    console.log("Create Work Item Relationship Error", e);
+    return { error: true, data: {} }
+  }
+}
+
+
+export const getSurveyListByWorkItemId = async (workItemId: any): Promise<any> => {
+  try {
+    // let workItemId = await window.parent.Xrm.Page.ui.formContext.data.entity.getId().replace("{", "").replace("}", "");
+    let workItemId = "322A7003-514D-EE11-BE6F-6045BDD0EF22";
+      let fetchXml = `?fetchXml=<fetch top='50'>
+        <entity name='gyde_surveytemplate'>
+          <attribute name='gyde_surveytemplateid' />
+          <attribute name='gyde_name' />
+          <filter>
+            <condition attribute='statuscode' operator='in' >
+              <value>1</value>
+              <value>528670001</value>
+            </condition>
+          </filter>
+          <link-entity name='gyde_workitemtemplate' from='gyde_workitemtemplateid' to='gyde_workitemtemplate'>
+            <link-entity name='gyde_workitemtemplatesequence' from='gyde_workitemtemplate' to='gyde_workitemtemplateid'>
+              <filter>
+                <condition attribute='gyde_workitem' operator='eq' value='${workItemId}' />
+              </filter>
+            </link-entity>
+          </link-entity>
+        </entity>
+      </fetch>`;
+
+      // await window.parent.Xrm.Page.ui._formContext.getAttribute("gyde_relatedsurveyitem").setRequiredLevel("required");
+      /* Set survey item filter */
+      const surveyList = await window.parent.Xrm.WebApi.retrieveMultipleRecords("gyde_surveytemplate", fetchXml)
+      console.log("surveyListsss", surveyList)
+      // return { error: false, data: surveyList?.entities }
+      return { error: false, data:surveyList?.entities}
+    } catch (e) {
+      console.log("Create Work Item Relationship Error", e);
+      return { error: true, data: []
+    }
+    }
+}
+  
+
+export const getWorkItemRelationshipByWorkitemId = async (workItemId: any): Promise<any> => {
+  try {
+    // let workItemId = await window.parent.Xrm.Page.ui.formContext.data.entity.getId().replace("{", "").replace("}", "");
+    // let workItemId = "322A7003-514D-EE11-BE6F-6045BDD0EF22";
+    let fetchXml = `?fetchXml=<fetch top="50"> 
+      <entity name="gyde_surveyworkitemrelatedsurveyitem">
+        <attribute name="createdby" />
+        <attribute name="gyde_itemtype" />
+        <attribute name="gyde_relatedsurveyitem" />
+        <attribute name="gyde_relatedsurveyitemid" />
+        <attribute name="gyde_surveyworkitem" />
+        <attribute name="gyde_surveyworkitemrelatedsurveyitemid" />
+        <attribute name="statuscode" />
+        <attribute name="gyde_name" />
+        <attribute name="gyde_isusedincreationrule" />
+      <filter>
+      <condition attribute="gyde_surveyworkitem" operator="eq" value="${workItemId}" />
+      </filter>
+      </entity>
+      </fetch>`;
+
+      // await window.parent.Xrm.Page.ui._formContext.getAttribute("gyde_relatedsurveyitem").setRequiredLevel("required");
+      /* Set survey item filter */
+      const workitemRelationshipList = await window.parent.Xrm.WebApi.retrieveMultipleRecords("gyde_surveyworkitemrelatedsurveyitem", fetchXml)
+      console.log("workitemRelationshipList", workitemRelationshipList);
+
+      // return { error: false, data: surveyList?.entities }
+      return { error: false, data: workitemRelationshipList?.entities}
+    } catch (e) {
+      console.log("Create Work Item Relationship Error", e);
+      return { error: true, data: []
+    }
+    }
+}
+  
+export const getQuestionInfoByQuestionName = async (questionName: any): Promise<any> => {
+  try {
+    // let workItemId = await window.parent.Xrm.Page.ui.formContext.data.entity.getId().replace("{", "").replace("}", "");
+    // let workItemId = "322A7003-514D-EE11-BE6F-6045BDD0EF22";
+    let fetchXml = `?fetchXml=<fetch top="50"> 
+    <entity name="gyde_surveytemplatechaptersectionquestion">
+      <attribute name="gyde_surveytemplate" />
+    <filter>
+    <condition attribute="gyde_name" operator="eq" value="${questionName}" />
+    </filter>
+    </entity>
+    </fetch>`;
+
+      // await window.parent.Xrm.Page.ui._formContext.getAttribute("gyde_relatedsurveyitem").setRequiredLevel("required");
+      /* Set survey item filter */
+      const questionDetails = await window.parent.Xrm.WebApi.retrieveMultipleRecords("gyde_surveytemplatechaptersectionquestion", fetchXml); 
+      console.log("questionDetails", questionDetails)
+    return { error: false, data: questionDetails?.entities?.length ? questionDetails?.entities[0] : {} }
+    } catch (e) {
+      console.log("Create Work Item Relationship Error", e);
+    return {
+      error: true, data: {}
+    }
+    }
+}
+
+
+export const xrmDeleteRequest = async (entityName: any, ids: any) : Promise<any> =>{
+  const promiseArray: any[] = [];
+  console.log("entityName", entityName)
+  console.log("entity ids", ids);
+  try {
+    ids.forEach(async (id: any) => {
+      console.log("Delete XML", id)
+     await window.parent.Xrm.WebApi.deleteRecord(entityName, id)
+    })
+    // await Promise.all(promiseArray);
+    return {
+      error: false, data: {}
+    }
+  } catch (e) {
+    console.log("Delete Work Item Relationship Error", e);
+    return {
+    error: true, data: {}
+  }
+  }
+}
+  

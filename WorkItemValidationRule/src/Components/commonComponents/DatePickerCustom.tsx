@@ -45,18 +45,18 @@ const DatePickerCustom: React.FC<DateTimeProps> = ({
 
   return (
     <Space direction="vertical" size={17}>
-      <DatePicker
-        defaultValue={
-          selectedValue && moment(selectedValue, dateFormat).isValid()
-            ? dayjs(moment(selectedValue, dateFormat).format(dateFormat))
-            : dayjs(moment().format(dateFormat))
-        }
-        format={dateFormat}
-        disabled={isDisabled}
-        onChange={(input, option) => onChnageDate(input, option)}
-        style={{ width: 200 }}
-      />
-    </Space>
+    <DatePicker
+      defaultValue={
+        selectedValue && moment(selectedValue, dateFormat).isValid()
+          && dayjs(moment(selectedValue, dateFormat).format(dateFormat))
+          
+      }
+      format={dateFormat}
+      disabled={isDisabled}
+      onChange={(input, option) => onChnageDate(input, option)}
+      style={{ width: '150px' }}
+    />
+  </Space>
   );
 };
 

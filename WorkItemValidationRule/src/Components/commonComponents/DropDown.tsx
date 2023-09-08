@@ -9,40 +9,7 @@ interface DropDownCommonProps {
   fieldName: any;
   selectedValue: any;
 }
-[
-  {
-      "and": [
-          {
-              "==": [
-                  {
-                      "var": "NTemp_C01_s01_grd"
-                  },
-                  123
-              ]
-          },
-          {
-              "==": [
-                  {
-                      "var": "NTemp_C01_s01_grd"
-                  },
-                  22
-              ]
-          },
-          {
-              "and": [
-                  {
-                      "==": [
-                          {
-                              "var": "NTemp_C2_S1_Q1"
-                          },
-                          " 224"
-                      ]
-                  }
-              ]
-          }
-      ]
-  }
-]
+
 const DropDown: React.FC<DropDownCommonProps> = ({ dropDownData, isDisabled, setExpression, changedId, fieldName, selectedValue }) => {
 
   useEffect(() => {
@@ -53,11 +20,16 @@ const DropDown: React.FC<DropDownCommonProps> = ({ dropDownData, isDisabled, set
     setExpression({ input: option.value, changedId, fieldName })
     // if(selectedValue === 'con') setExpression({ input: "" , changedId, fieldName: "value" })
   }
+
+  useEffect(() => {
+    console.log("fieldNamefieldName", fieldName)
+  }, [fieldName])
   return (
     <div>
-      <Select
+
+<Select
         showSearch
-        style={{ width: 200 }}
+        style={fieldName === 'expression' ? { width: '100px' } : fieldName === 'condition' ? { width: '150px' } :  { width: '150px' }}
         placeholder="Search to Select"
         optionFilterProp="children"
         filterOption={(input, option) => (option?.label ?? "").includes(input)}
@@ -76,24 +48,3 @@ const DropDown: React.FC<DropDownCommonProps> = ({ dropDownData, isDisabled, set
 };
 
 export default DropDown;
-
-[
-  {
-      "": [
-          [
-              {
-                  "if": [
-                      {
-                          "==": [
-                              {
-                                  "var": "NTemp_C01_04_Q_04"
-                              },
-                              "2023-08-24"
-                          ]
-                      }
-                  ]
-              }
-          ]
-      ]
-  }
-]

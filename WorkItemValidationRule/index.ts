@@ -29,9 +29,9 @@ export class WorkItemValidationRule implements ComponentFramework.StandardContro
         this.imgElement1 = document.createElement("img");
         this.imgElement2 = document.createElement("img");
 
-        context.resources.getResource("expand.png", this.setImage.bind(this, false, "png"), this.showError.bind(this));
         context.resources.getResource("delete.png", this.setImage.bind(this, false, "png"), this.showError.bind(this));
-		context.resources.getResource("shrink.png", this.setImage.bind(this, false, "png"), this.showError.bind(this));
+        context.resources.getResource("delete.png", this.setImage.bind(this, false, "png"), this.showError.bind(this));
+		context.resources.getResource("delete.png", this.setImage.bind(this, false, "png"), this.showError.bind(this));
 
         container.appendChild(this.imgElement);
         container.appendChild(this.imgElement1);
