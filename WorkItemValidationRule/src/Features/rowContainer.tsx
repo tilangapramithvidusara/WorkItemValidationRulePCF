@@ -92,6 +92,9 @@ const RowContainer: React.FC<TableRowProps> = ({
   const [defaultExpression, setDefaultExpression] = useState<any>("");
   const [defaultSection, setDefaultSection] = useState<any>();
   const [dropDownQuestionList, setDropDownQuestionList]  = useState<any>();
+  const [listAnsersWithQuestionIds, setListAnsersWithQuestionIds] = useState<any>();
+  const [listQuestionIds, setListQuestionIds]  = useState<any>();
+  const [listQuestionLoading, setListQuestionLoading]  = useState<any>(false);
 
   const findConditionByLevel = (
     level: any,
@@ -182,7 +185,7 @@ const RowContainer: React.FC<TableRowProps> = ({
     // Added validation, If the same level expression Changed other child has to be changed
     if (fieldValue?.fieldName === "expression") {
       console.log("fieldValue Exp", fieldValue);
-      setDefaultExpression(fieldValue?.input)
+      setDefaultExpression(fieldValue?.input);
       let releatedFields = _nestedRows?.find((x: any[]) => x[sectionLevel])?.[
         sectionLevel
       ]?.fields;
@@ -435,8 +438,14 @@ const RowContainer: React.FC<TableRowProps> = ({
     }
     const questionListInNestedArr = releatedSection?.fields?.map((x: any) => x?.field);
     console.log("dropDownQuestionList", questionListInNestedArr);
-    console.log("dropDownQuestionList 1", dropDownQuestionList)
+    console.log("dropDownQuestionList 1", dropDownQuestionList);
 
+    if (releatedSection &&
+      releatedSection?.fields &&
+      releatedSection?.fields[1] &&
+      releatedSection?.fields[1]?.expression) {
+      setDefaultExpression(releatedSection?.fields[1]?.expression);
+    }    
     setDropDownQuestionList(() => {
       return dropDownQuestionList?.map((item: { label: any; }) => {
         if (questionListInNestedArr?.includes(item?.label)) {
@@ -596,12 +605,76 @@ const RowContainer: React.FC<TableRowProps> = ({
 
   useEffect(() => {
     if (questionList && questionList.length) {
+      const listQuestions = questionList?.filter((x: any) => x["questionType"] === dbConstants?.questionTypes?.listQuestion)?.map((x: any) => x?.value);
+      let releatedFields = _nestedRows?.find((x: any[]) => x[sectionLevel]);
+      if (releatedFields) {
+        const fields = releatedFields[sectionLevel]?.fields?.map((x: any) => x?.field);
+        const matchedValues = listQuestions?.filter((value: any) => fields?.includes(value));
+        console.log("matchedValues", matchedValues);
+        console.log("matchedValues listQuestions", listQuestions);
+        console.log("matchedValues fields", fields);
+
+        if (matchedValues && matchedValues?.length) setListQuestionIds(matchedValues);
+      }
+
       setDropDownQuestionList(questionList?.filter((quesNme: any) =>
         quesNme &&
-        quesNme["questionType"] !== "Grid" &&
+        // quesNme["questionType"] !== "Grid" &&
           quesNme["questionType"] !== "Header"
     ))}
   }, [questionList])
+
+
+  const fetchQuestionDetails = async (questionIds: any) => {
+    const questionListArray: any = [];
+  
+    await Promise.all(
+      questionIds?.map(async (questionId: any) => {
+        const questionDetails = questionList?.find(
+          (x: any) => x.value === questionId
+        );
+  
+        if (questionDetails?.questionType === dbConstants.questionTypes.listQuestion) {
+          setIsLoad(true);
+  
+          const response = await getListAnswersByQuestionId(
+            questionDetails?.questionId
+          );
+  
+          let dropDownData = [];
+          if (response?.data?.entities) {
+            dropDownData = response?.data.entities.map((x: any) => ({
+              label: x.gyde_answervalue,
+              value: x.gyde_answervalue,
+            }));
+            questionListArray.push({ questionId, listAnswers: dropDownData });
+            setIsLoad(false);
+          }
+        }
+      })
+    );
+  
+    if (questionListArray && questionListArray?.length) {
+      setListAnsersWithQuestionIds(questionListArray);
+      
+    }
+    setListQuestionLoading(false);
+  };
+
+  useEffect(() => {
+    console.log("setListQuestionIds", listQuestionIds)
+    if (listQuestionIds && listQuestionIds?.length) {
+      setListQuestionLoading(true);
+      fetchQuestionDetails(listQuestionIds);
+    }
+  }, [listQuestionIds]);
+
+  useEffect(() => {
+    console.log("listAnsersWithQuestionIds", listAnsersWithQuestionIds);
+    // if (listAnsersWithQuestionIds) {
+    //   setAnswersDropDownData(dropDownData);
+    // }
+  }, [listAnsersWithQuestionIds])
 
   const renderNestedConditions = (conditions: any[], marginLeft = 0) => {
     console.log("conditions----->", conditions);
@@ -725,8 +798,8 @@ const RowContainer: React.FC<TableRowProps> = ({
                       <DropDown
                         dropDownData={operationalSampleData[0]?.options?.filter(
                           (item: { value: string }) =>
-                            item?.value === "==" ||
-                            item?.value === "!=" ||
+                            // item?.value === "==" ||
+                            // item?.value === "!=" ||
                             item?.value === "con"
                         )}
                         isDisabled={
@@ -823,7 +896,8 @@ const RowContainer: React.FC<TableRowProps> = ({
                             changedId={condition?.level}
                             fieldName={"value"}
                             selectedValue={condition?.value}
-                            listDropDownData={answersDropDownData}
+                            listDropDownData={answersDropDownData.concat(listAnsersWithQuestionIds?.find((x: any) => x?.questionId === condition?.field)?.listAnswers)?.filter(x => x)}
+                                    
                           />
                         ) : dropDownQuestionList?.find(
                           (x: { value: string }) => x?.value === condition?.field
@@ -881,11 +955,12 @@ const RowContainer: React.FC<TableRowProps> = ({
                           // </img>
                           <></>
                           :
-                          <div className="flex-wrap" onClick={() => _handleDeleteRow(condition?.level)}>  
+                          <div className="flex-wrap">  
                             <img 
                             src={imageUrls?.imageUrl} alt="icon"
                             // onClick={() => _handleDeleteRow(condition?.level)}
                             height={'15px'}
+                            onClick={() => _handleDeleteRow(condition?.level)}
                             />
                             <span className="remove-text">Remove </span>
                           </div>
@@ -948,7 +1023,10 @@ const RowContainer: React.FC<TableRowProps> = ({
             </div>
           )}
           <div style={{ paddingLeft: "30px" }}>
-            {renderNestedConditions(condition?.innerConditions, marginLeft + 5)}
+          {
+                !listQuestionLoading && renderNestedConditions(condition?.innerConditions, marginLeft + 5)
+          }
+            {/* {renderNestedConditions(condition?.innerConditions, marginLeft + 5)} */}
           </div>
         </div>
       ));
@@ -993,10 +1071,11 @@ const RowContainer: React.FC<TableRowProps> = ({
                   height={'15px'}
                 >
                   </img> :
-            <div onClick={() => handleSectionRemove(sectionLevel)} >
+            <div>
                     <img
                         src={imageUrls?.imageUrl} alt="icon"
-                      height={'15px'}
+                height={'15px'}
+                onClick={() => handleSectionRemove(sectionLevel)} 
                       // onClick={() => handleSectionRemove(sectionLevel)}
                         /> 
                 <span className="remove-text">Remove </span>

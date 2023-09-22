@@ -18,6 +18,8 @@ import {
   getQuestionInfoByQuestionName,
   getWorkItemRelationshipByWorkitemId,
   xrmDeleteRequest,
+  reloadPage,
+  getListAnswersByQuestionId,
 } from "../XRMRequests/xrmRequests";
 import { dbConstants } from "../constants/dbConstants";
 import { normalConverter } from "../Utils/dbFormatToJson";
@@ -62,6 +64,7 @@ const ParentComponent = ({
   const [localTest, setLocalTest] = useState<any>(false);
   const [relationships, setRelationships] = useState<any[]>([]);
   const [initialLoadWithNoSurvey, setInitialLoadWithNoSurvey] = useState<any>(false);
+  const [disableSaveButton, setDisableSaveButton] = useState<any>(false);
 
 
   // const [deleteSectionKey, setDeleteSectionKey] = useState<any>();
@@ -98,7 +101,7 @@ const ParentComponent = ({
           quesNme &&
           quesNme[
             "gyde_answertype@OData.Community.Display.V1.FormattedValue"
-          ] !== "Grid" &&
+          ] !== dbConstants?.questionTypes?.dateTimeQuestion &&
           quesNme[
             "gyde_answertype@OData.Community.Display.V1.FormattedValue"
           ] !== "Header"
@@ -145,7 +148,7 @@ const ParentComponent = ({
     if (_nestedRows?.length === 0 || !_nestedRows?.length)
       setIsApiDataLoaded(false);
     
-    
+    console.log("_nestedRows", _nestedRows)
   }, [_nestedRows]);
 
   // for retrieve purpose
@@ -371,10 +374,10 @@ const ParentComponent = ({
   const _getWorkItemRelationshipByWorkitemId = async () => {
     const { data = [] } = await getWorkItemRelationshipByWorkitemId(currentPossitionDetails?.id);
     console.log("RelationShipsss", data);
-    if (data?.length) {
-      const relationShipUsedInCreationRule = data?.filter((relShips: any) => relShips?.gyde_isusedincreationrule)
-      console.log("relationShipUsedInCreationRule", relationShipUsedInCreationRule)
-      if(relationShipUsedInCreationRule?.length > 0) setRelationships(relationShipUsedInCreationRule);
+    if (!data?.error) {
+      // const relationShipUsedInCreationRule = data?.filter((relShips: any) => relShips?.gyde_isusedincreationrule)
+      // console.log("relationShipUsedInCreationRule", relationShipUsedInCreationRule)
+      setRelationships(data);
     }
   }
 
@@ -411,22 +414,6 @@ const ParentComponent = ({
       );
     }
   }
-  // useEffect(() => {
-  //   console.log("deleteSectionKey", deleteSectionKey);
-  //   if (deleteSectionKey) {
-  //     _setNestedRows((prevNestedRows: any) => {
-  //       if (prevNestedRows && prevNestedRows.length === 1) {
-  //         saveVisibilityData({});
-  //       }
-  //       return prevNestedRows.filter(
-  //         (key: any) => parseInt(Object.keys(key)[0]) !== deleteSectionKey
-  //       )
-  //     });
-  //     setSections((prev: any) =>
-  //       prev.filter((prevKeys: any) => prevKeys.key !== deleteSectionKey)
-  //     );
-  //   }
-  // }, [deleteSectionKey]);
 
   const _getCurrentState = async () => {
     const result = await getWorkItemId();
@@ -434,6 +421,10 @@ const ParentComponent = ({
     if (result?.data) setCurrentPossitionDetails(result?.data);
   };
 
+  useEffect(() => {
+    console.log("relationships sets", relationships)
+  }, [relationships]);
+  
   const saveVisibilityData = async (
     visibilityRule: any,
   ) => {
@@ -452,113 +443,181 @@ const ParentComponent = ({
     });
     if (result?.data) {
       openNotificationWithIcon(result?.data?.error ? "error" : "success", result?.data?.error ? "Error Occured!" : "Data Saved!");
-      if(!result?.data?.error) await handleRelationshipEntity() 
     }
 
-    // if (
-    //   currentPossitionDetails?.id &&
-    //   (currentPossitionDetails.currentPosition === "section" ||
-    //     currentPossitionDetails?.currentPosition === "chapter") 
-    // ) {
-    //   await saveRequest(logicalName, currentPossitionDetails?.id, {
-    //     [dbConstants.common.gyde_visibilityrule]:
-    //       JSON.stringify(visibilityRule),
-    //   });
-    // } else if (
-    //   currentPossitionDetails?.id &&
-    //   currentPossitionDetails?.currentPosition === "question"
-    // ) {
-    //   console.log("Before Saving visibilityRule", visibilityRule);
-        // await saveRequest(logicalName, currentPossitionDetails?.id, {
-        //   [dbConstants.common.gyde_visibilityrule]:
-        //     JSON.stringify(visibilityRule),
-        // });
-    // }
+    await handleRelationshipEntity(); 
   };
 
   const handleRelationshipEntity = async () => {
-    let _prepareForRelationship
-    let relationshipDataset : any = []
-    _nestedRows.forEach((sec: any) => {
+    let _prepareForRelationship: any;
+    let relationshipCreationArray: any = [];
+
+    // const existanceRelationshipIds = relationships?.map(rela => {
+    //   const nameLbl = rela?.gyde_name?.split('-');
+    //   console.log("extractedString nameLbl", nameLbl);
+    //   if (rela?.gyde_itemtype === dbConstants?.common?.item_type_question && nameLbl?.length > 1) {
+    //       const extractedString = nameLbl[0].trim();
+    //       console.log("extractedString", extractedString);
+    //       return extractedString;
+    //   }
+    // })?.filter(x => x);
+
+    for (const sec of _nestedRows) {
       console.log("SECCCCCCCC", sec);
       const key = Object.keys(sec)[0];
       _prepareForRelationship = JSON.parse(JSON.stringify(sec[key].fields));
-      relationshipDataset = _prepareForRelationship.map((relField: any) => {
+    
+      await Promise.all(_prepareForRelationship?.map(async (relField: any) => {
         let selectedValue: any = questionList.find((x: { value: any; }) => x?.value === relField?.field);
-        if (selectedValue?.questionType === "List") selectedValue.options = relField?.value || ""
-        console.log("selectedValueselectedValue", selectedValue)
-        if (Object.keys(selectedValue)?.length !== 0) return selectedValue
-      })
-      console.log("relationshipDataset", relationshipDataset)
-    });
-    // relationshipDataset = relationshipDataset?.filter((x: any) => {
-    //   relationships?.
-    // })
-    if(relationshipDataset) await createRelationshipForWI(currentPossitionDetails?.id, relationshipDataset);
+    
+        if (selectedValue?.questionType === "List") {
+          const response = await getListAnswersByQuestionId(selectedValue?.questionId);
+          let listAnswers = [];
+    
+          if (response?.data?.entities) {
+            listAnswers = response?.data.entities.map((x: any) => ({
+              value: x.gyde_answervalue,
+            }));
+          }
+    
+          console.log("Relationship List Answers", listAnswers);
+    
+          const newObject = {
+            "label": selectedValue?.label,
+            "value": listAnswers.length > 0 ? listAnswers[0]?.value : selectedValue?.value, // Set the value based on availability
+            "questionType": selectedValue?.questionType,
+            "questionId": selectedValue?.questionId,
+            "sectionId": selectedValue?.sectionId,
+            "status": selectedValue?.status,
+            "internalId": selectedValue?.internalId,
+            "options": relField?.value
+          };
+    
+          relationshipCreationArray.push(newObject);
+        }
+    
+        console.log("selectedValueselectedValue", selectedValue);
+    
+        if (Object.keys(selectedValue)?.length !== 0) {
+          relationshipCreationArray.push(selectedValue);
+        }
+      }));
+    
+      console.log("relationshipCreationArray", relationshipCreationArray);
+    }
+    
+    if (relationshipCreationArray && relationshipCreationArray?.length) {
+      await createRelationshipForWI(currentPossitionDetails?.id, relationshipCreationArray);
+    }
+    
+    await _getWorkItemRelationshipByWorkitemId();
+    await reloadPage();
+    setDisableSaveButton(false);
+    
+    // _nestedRows.forEach((sec: any) => {
+    //   console.log("SECCCCCCCC", sec);
+    //   const key = Object.keys(sec)[0];
+    //   _prepareForRelationship = JSON.parse(JSON.stringify(sec[key].fields));
+    //   _prepareForRelationship?.forEach(async (relField: any) => {
+    //     let selectedValue: any = questionList.find((x: { value: any; }) => x?.value === relField?.field);
+    //     if (selectedValue?.questionType === "List") {
+    //       // selectedValue.options = relField?.value || "";
+
+    //       const response = await getListAnswersByQuestionId(
+    //         selectedValue?.questionId
+    //       );
+  
+    //       let listAnswers = [];
+    //       if (response?.data?.entities) {
+    //         listAnswers = response?.data.entities.map((x: any) => ({
+    //           value: x.gyde_answervalue,
+    //         }));
+    //         // questionListArray.push({ questionId, listAnswers: dropDownData });
+    //         // setIsLoad(false);
+    //       }
+    //       console.log("Relationship List Answers", listAnswers);
+    //       const newObject = {
+    //         "label": selectedValue?.label,
+    //         "value": listAnswers[0]?.value,
+    //         "questionType": selectedValue?.questionType,
+    //         "questionId": selectedValue?.questionId,
+    //         "sectionId": selectedValue?.sectionId,
+    //         "status": selectedValue?.status,
+    //         "internalId": selectedValue?.internalId,
+    //         "options": relField?.value
+    //       };
+    //       relationshipCreationArray.push(newObject);
+    //     }
+    //     console.log("selectedValueselectedValue", selectedValue);
+    //     // console.log("existanceRelationshipIds", existanceRelationshipIds);
+
+    //     if (Object.keys(selectedValue)?.length !== 0) {
+    //       relationshipCreationArray.push(selectedValue)
+    //     }
+    //   });
+    //   console.log("relationshipCreationArray", relationshipCreationArray);
+
+    // });
+    // // relationshipDataset = relationshipDataset?.filter((x: any) => {
+    // //   relationships?.
+    // // })
+    // if (relationshipCreationArray && relationshipCreationArray?.length) await createRelationshipForWI(currentPossitionDetails?.id, relationshipCreationArray);
+    
+    // await _getWorkItemRelationshipByWorkitemId();
+    // await reloadPage();
+    // setDisableSaveButton(false);
   }
   const handleSaveLogic = async () => {
-    let visibilityRule: any = [];
     let visibilityRuleNormal: any = [];
     let _prepareForRelationship;
     let deleteRelationshipIds: any;
+    let fieldsLables: any;
+    setDisableSaveButton(true);
+
     _nestedRows.forEach((sec: any) => {
       console.log("SECCCCCCCC", sec);
       const key = Object.keys(sec)[0];
       let prepareForValidation = JSON.parse(JSON.stringify(sec[key].fields));
       _prepareForRelationship = JSON.parse(JSON.stringify(sec[key].fields));
       prepareForValidation[0].expression = "Emp";
-      // const _hasNullFields = hasNullFields(prepareForValidation);
-      // if (_hasNullFields) {
-      //   openNotificationWithIcon("error", "Fields cannot be empty!");
-      //   return;
-      // }
-      let fieldsLables = _prepareForRelationship?.map((x: any) => x?.field);
+      console.log("prepareForValidation", prepareForValidation);
+      const _hasNullFields = hasNullFields(prepareForValidation);
+      if (_hasNullFields) {
+        openNotificationWithIcon("error", "Fields cannot be empty!");
+        return;
+      }
+      fieldsLables = _prepareForRelationship?.map((x: any) => x?.field);
       console.log("fieldsLables", fieldsLables);
-      // deleteRelationshipIds = relationships?.map((rela: any) => {
-      //   const nameLbl = rela?.gyde_name?.split('-');
-      //   console.log("nameLbl", nameLbl);
-      //   if (nameLbl?.length > 1) {
-      //     const extractedString = nameLbl[0].trim();
-      //     console.log("extractedString", extractedString);
-      //     console.log("extractedString", fieldsLables?.includes(extractedString));
-      //     if (!fieldsLables?.includes(extractedString)) {
-      //       return rela?.gyde_surveyworkitemrelatedsurveyitemid
-      //     }
-      //   } 
-      // })?.filter((item) => item !== undefined); 
       const _visibility : any = convertJSONFormatToDBFormat(sec[key], true);
       console.log("_visibility", _visibility);
       visibilityRuleNormal.push(_visibility);
-      // visibilityRule = findAndUpdateLastNestedIf(
-      //   visibilityRule,
-      //   { if: [_visibility] },
-      //   false
-      // );
     });
 
-
+    // deleteRelationshipIds = relationships?.filter(rela => {
+    //   const nameLbl = rela?.gyde_name?.split('-');
+    //   console.log("nameLbl", nameLbl);
+    //     if (rela?.gyde_itemtype === dbConstants?.common?.item_type_answer) {
+    //       return rela;
+    //     } else if (nameLbl?.length > 1) {
+    //       const extractedString = nameLbl[0].trim();
+    //       console.log("extractedString", extractedString);
+    //       console.log("extractedString", fieldsLables?.includes(extractedString));
+    //       if (!fieldsLables?.includes(extractedString)) {
+    //         return rela;
+    //       }
+    //     }
+    // })?.map(x => x?.gyde_surveyworkitemrelatedsurveyitemid);
     deleteRelationshipIds = relationships?.map(x => x?.gyde_surveyworkitemrelatedsurveyitemid);
-    if (deleteRelationshipIds?.length) {
-      console.log("deleteRelationshipIds", deleteRelationshipIds)
-      await xrmDeleteRequest(dbConstants?.common?.gyde_surveyworkitemrelatedsurveyitem, deleteRelationshipIds);
-    }
+    console.log("deleteRelationshipIds 1", deleteRelationshipIds);
     // if (deleteRelationshipIds?.length) {
-      // console.log("deleteRelationshipIds", deleteRelationshipIds);
-      // const { data = [] } = await getWorkItemRelationshipByWorkitemId(currentPossitionDetails?.id);
-      // console.log("RelationShipsss when deleting", data);
-      // if (data?.length) {
-      //   const relationShipUsedInCreationRule = data?.map((relShips: any) => relShips?.gyde_name);
-      //   // console.log("relationShipUsedInCreationRule 1", relationShipUsedInCreationRule)
-      //   const deleteRecords = deleteRelationshipIds?.filter((x: any) => {
-      //     data?.forEach((y: any) => {
-      //       if (x === y?.gyde_name) return;
-      //     })
-      //   })
-      //   console.log("relationShipUsedInCreationRule 2", deleteRecords)
-      //   await xrmDeleteRequest(dbConstants?.common?.gyde_surveyworkitemrelatedsurveyitem, deleteRecords);
-      // }
+    //   console.log("deleteRelationshipIds 2", deleteRelationshipIds)
+    //   await xrmDeleteRequest(dbConstants?.common?.gyde_surveyworkitemrelatedsurveyitem, deleteRelationshipIds);
     // }
-    let savedVisibilityRuleFinalFormat: any = [];
+    const deleteResult = await xrmDeleteRequest(dbConstants?.common?.gyde_surveyworkitemrelatedsurveyitem, deleteRelationshipIds);
+
+    if (!deleteResult?.error) {
+      await _getWorkItemRelationshipByWorkitemId();
+      let savedVisibilityRuleFinalFormat: any = [];
       if (
         visibilityRuleNormal.length === 1
       ) {
@@ -572,13 +631,14 @@ const ParentComponent = ({
           savedVisibilityRuleFinalFormat = visibilityRuleNormal[0]
         }
       }
-    console.log(
-      "savedVisibilityRuleFinalFormat",
-      savedVisibilityRuleFinalFormat
-    );
-    await saveVisibilityData(
-      savedVisibilityRuleFinalFormat ? savedVisibilityRuleFinalFormat : {},
-    )
+      console.log(
+        "savedVisibilityRuleFinalFormat",
+        savedVisibilityRuleFinalFormat
+      );
+      await saveVisibilityData(
+        savedVisibilityRuleFinalFormat ? savedVisibilityRuleFinalFormat : {},
+      )
+    }
   };
 
   useEffect(() => {
@@ -593,6 +653,8 @@ const ParentComponent = ({
       console.log("DGDDDSSSS", survey);
       if(survey?.gyde_surveytemplateid) setSelectedSurvey(survey?.gyde_surveytemplateid)
       if(!survey) setInitialLoadWithNoSurvey(true)
+    } else {
+      setInitialLoadWithNoSurvey(false)
     }
   }
   useEffect(() => {
@@ -677,7 +739,7 @@ const ParentComponent = ({
                     <Button
                       onClick={handleSaveLogic}
                       className="mr-10 btn-primary"
-                      disabled={suerveyIsPublished}
+                      disabled={disableSaveButton || suerveyIsPublished}
                     >
                       Save
                       

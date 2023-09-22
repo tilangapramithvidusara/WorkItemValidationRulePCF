@@ -18,10 +18,9 @@ export const dbConstants = {
     statusCode: "statuscode",
     gyde_surveytemplatequestionanswer: "gyde_surveytemplatequestionanswer",
     gyde_surveytemplatechaptersectionquestion: "gyde_surveytemplatechaptersectionquestion",
-    // gyde_surveytemplatechaptersection: "gyde_surveytemplatechaptersection",
-    // gyde_surveytemplatequestionanswer: "gyde_surveytemplatequestionanswer",
     gyde_surveyworkitemrelatedsurveyitem: "gyde_surveyworkitemrelatedsurveyitem",
-
+    item_type_question: 528670003,
+    item_type_answer: 528670004,
   },
   questionTypes: {
     numericQuestion: "Numeric",

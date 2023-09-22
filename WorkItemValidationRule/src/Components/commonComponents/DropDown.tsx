@@ -21,6 +21,16 @@ const DropDown: React.FC<DropDownCommonProps> = ({ dropDownData, isDisabled, set
     // if(selectedValue === 'con') setExpression({ input: "" , changedId, fieldName: "value" })
   }
 
+  const searchFilterSort = (optionA: any, optionB: any) => {
+    console.log("Drop orppPPPP", optionA, optionB);
+    return (optionA?.label ?? '')?.toLowerCase().localeCompare((optionB?.label ?? '')?.toLowerCase());
+}
+
+const searchFilterOption = (input: any, option: any) => {
+    console.log(" Drop orppPP option", input, option);
+    return (option?.label ?? '')?.toLowerCase()?.includes(input?.toLowerCase())
+}
+
   useEffect(() => {
     console.log("fieldNamefieldName", fieldName)
   }, [fieldName])
@@ -32,16 +42,18 @@ const DropDown: React.FC<DropDownCommonProps> = ({ dropDownData, isDisabled, set
         style={fieldName === 'expression' ? { width: '100px' } : fieldName === 'condition' ? { width: '150px' } :  { width: '150px' }}
         placeholder="Search to Select"
         optionFilterProp="children"
-        filterOption={(input, option) => (option?.label ?? "").includes(input)}
-        filterSort={(optionA, optionB) =>
-          (optionA?.label ?? "")
-            .toLowerCase()
-            .localeCompare((optionB?.label ?? "").toLowerCase())
-        }
+        // filterOption={(input, option) => (option?.label ?? "").includes(input)}
+        // filterSort={(optionA, optionB) =>
+        //   (optionA?.label ?? "")
+        //     .toLowerCase()
+        //     .localeCompare((optionB?.label ?? "").toLowerCase())
+        // }
         options={dropDownData}
         disabled={isDisabled ? isDisabled : false}
         onChange={(input, option) => onChangeEvent(option)}
         value={selectedValue}
+        filterOption={searchFilterOption}
+        filterSort={searchFilterSort}
       />
     </div>
   );
