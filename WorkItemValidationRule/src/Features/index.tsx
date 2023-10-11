@@ -464,12 +464,14 @@ const ParentComponent = ({
 
     for (const sec of _nestedRows) {
       console.log("SECCCCCCCC", sec);
+      let answerObject: any = {};
+      let questionObject: any = {};
       const key = Object.keys(sec)[0];
       _prepareForRelationship = JSON.parse(JSON.stringify(sec[key].fields));
     
       await Promise.all(_prepareForRelationship?.map(async (relField: any) => {
-        let selectedValue: any = questionList.find((x: { value: any; }) => x?.value === relField?.field);
-    
+        let selectedValue: any = questionList?.find((x: { value: any; }) => x?.value === relField?.field);
+        console.log("selectedValue xxxxxxx ", selectedValue);
         if (selectedValue?.questionType === "List") {
           const response = await getListAnswersByQuestionId(selectedValue?.questionId);
           let listAnswers = [];
@@ -481,25 +483,42 @@ const ParentComponent = ({
           }
     
           console.log("Relationship List Answers", listAnswers);
-    
-          const newObject = {
+
+          if (listAnswers[0]?.value) {
+            answerObject = {
+              "label": selectedValue?.label,
+              "value": listAnswers.length > 0 ? listAnswers[0]?.value : selectedValue?.value, // Set the value based on availability
+              "questionType": selectedValue?.questionType,
+              "questionId": selectedValue?.questionId,
+              "sectionId": selectedValue?.sectionId,
+              "status": selectedValue?.status,
+              "internalId": selectedValue?.internalId,
+              "options": listAnswers[0]?.value
+            };
+          }
+          questionObject = {
             "label": selectedValue?.label,
-            "value": listAnswers.length > 0 ? listAnswers[0]?.value : selectedValue?.value, // Set the value based on availability
+            "value": selectedValue?.label, // Set the value based on availability
             "questionType": selectedValue?.questionType,
             "questionId": selectedValue?.questionId,
             "sectionId": selectedValue?.sectionId,
             "status": selectedValue?.status,
             "internalId": selectedValue?.internalId,
-            "options": relField?.value
+            "usedInCreationRule": "false"
           };
-    
-          relationshipCreationArray.push(newObject);
+          if (Object.keys(answerObject)?.length !== 0) {
+            relationshipCreationArray.push(answerObject);
+          }
+          if (Object.keys(questionObject)?.length !== 0) {
+            relationshipCreationArray.push(questionObject);
+          }  
         }
     
         console.log("selectedValueselectedValue", selectedValue);
-    
-        if (Object.keys(selectedValue)?.length !== 0) {
-          relationshipCreationArray.push(selectedValue);
+        if (selectedValue?.questionType !== "List" && Object.keys(selectedValue)?.length !== 0) {
+          // if (Object.keys(selectedValue)?.length !== 0) {
+            relationshipCreationArray.push(selectedValue);
+          // }
         }
       }));
     
@@ -510,9 +529,11 @@ const ParentComponent = ({
       await createRelationshipForWI(currentPossitionDetails?.id, relationshipCreationArray);
     }
     
-    await _getWorkItemRelationshipByWorkitemId();
-    await reloadPage();
-    setDisableSaveButton(false);
+    setTimeout(async () => {
+      await _getWorkItemRelationshipByWorkitemId();
+      await reloadPage();
+      setDisableSaveButton(false);
+    }, 3000); // 2000 milliseconds = 2 seconds
     
     // _nestedRows.forEach((sec: any) => {
     //   console.log("SECCCCCCCC", sec);

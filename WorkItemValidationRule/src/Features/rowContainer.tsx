@@ -277,10 +277,10 @@ const RowContainer: React.FC<TableRowProps> = ({
       _fieldValue.fieldName = "value";
       fieldValueSetToNestedRows(_fieldValue);
       
-      // let __fieldValue: any = fieldValue;
-      // __fieldValue.input = " ";
-      // __fieldValue.fieldName = "condition";
-      // fieldValueSetToNestedRows(__fieldValue);
+      let __fieldValue: any = JSON.parse(JSON.stringify(fieldValue));
+      __fieldValue.input = " ";
+      __fieldValue.fieldName = "condition";
+      fieldValueSetToNestedRows(__fieldValue);
       
     } else if (fieldValue?.fieldName === "condition") {
       console.log("CONNNNNNNNNN")

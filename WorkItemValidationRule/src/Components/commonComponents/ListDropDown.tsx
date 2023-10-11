@@ -18,7 +18,6 @@ const ListDropDown: React.FC<ListDropDownCommonProps> = ({ dropDownData, isDisab
 
   
   useEffect(() => {
-    console.log("listDropDownData", listDropDownData)
     if (listDropDownData && listDropDownData?.length) {
       setDropDownValues(listDropDownData?.filter((item: { value: any; }, index: any, self: any[]) =>
       index === self?.findIndex((obj: { value: any; }) => obj?.value === item?.value)
@@ -27,12 +26,10 @@ const ListDropDown: React.FC<ListDropDownCommonProps> = ({ dropDownData, isDisab
   }, [listDropDownData]);
 
   const searchFilterSort = (optionA: any, optionB: any) => {
-    console.log("List orppPPPP", optionA, optionB);
     return (optionA?.label ?? '')?.toLowerCase().localeCompare((optionB?.label ?? '')?.toLowerCase());
 }
 
 const searchFilterOption = (input: any, option: any) => {
-    console.log(" List orppPP option", input, option);
     return (option?.label ?? '')?.toLowerCase()?.includes(input?.toLowerCase())
 }
   

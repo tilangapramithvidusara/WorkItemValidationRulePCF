@@ -63,11 +63,25 @@ export const getCurrentState = async () => {
 
 export const getWorkItemId = async() => {
   try {
-    const id = await window.parent.Xrm.Page.ui._formContext.data.entity.getId().replace("{", "").replace("}", "");
-    console.log("validation rules data ===========> ", id);
+    const currentPosition = await window.parent.Xrm.Page.ui._formContext._entityName;
+    console.log("CURRR POS", currentPosition);
+    let workItemId
+    if (currentPosition === 'gyde_surveytemplate') {
+      const paneIdObj = await window.parent.Xrm.App.sidePanes.getAllPanes()._collection;
+      const sequenceId = Object.keys(paneIdObj)[0]
+      const res = await getWorkItemIdBySequenceId(sequenceId);
+      workItemId = res?.workitemId;
+    } else {
+      workItemId = await window.parent.Xrm.Page.ui._formContext.data.entity.getId().replace("{", "").replace("}", "");
+      console.log("validation rules data ===========> ", workItemId);
+      const test = await window.parent.Xrm.Page.ui;
+      console.log("WorkItemId Testt ===========> ", test);
+    }
+
+
     return {
       error: false,
-      data: {id}
+      data: {id: workItemId}
     }
     
   } catch (error) {
@@ -147,12 +161,6 @@ export const getListAnswersByQuestionId = async (questionGuid: any): Promise<any
   try {
     let listAnswers = await window.parent.Xrm.WebApi.retrieveMultipleRecords("gyde_surveytemplatequestionanswer", "?$filter=_gyde_relatedquestion_value eq " + questionGuid)
     console.log("listAnswers", listAnswers)
-    
-        for (var i = 0; i < listAnswers.entities.length; i++) {
-          var result = listAnswers.entities[i];
-          // Columns
-          var gyde_surveytemplatequestionanswerid = result["gyde_surveytemplatequestionanswerid"];
-        }
     return {
       error: false, data: listAnswers
     };
@@ -222,7 +230,7 @@ export const createRelationshipForWI = async (workitemId: any, updateRecordDetai
       record["gyde_surveyworkitem@odata.bind"] = `/gyde_surveyworkitems(${workitemId})`; // Lookup
       record["gyde_relatedsurveyitemid"] = rcd?.internalId;
       record["gyde_itemtype"] = rcd?.options ? dbConstants?.common?.item_type_answer : dbConstants?.common?.item_type_question;
-      record["gyde_isusedincreationrule"] = true
+      record["gyde_isusedincreationrule"] = rcd?.usedInCreationRule === "false" ? false : true;
       record["gyde_iscopydesignnotes"] = false
       record["gyde_isincludeindevopsoutput"] = false
       record["gyde_name"] = `${rcd?.value} - ${workitemDetails?.gyde_title}`
@@ -279,6 +287,45 @@ export const getSurveyListByWorkItemId = async (workItemId: any): Promise<any> =
     }
 }
   
+
+export const getWorkItemIdBySequenceId = async (sequenceId: any): Promise<any> => {
+  try {
+    // let workItemId = await window.parent.Xrm.Page.ui.formContext.data.entity.getId().replace("{", "").replace("}", "");
+    // let workItemId = "322A7003-514D-EE11-BE6F-6045BDD0EF22";
+    let fetchXml = `?fetchXml=<fetch top="50">
+    <entity name="gyde_workitemtemplatesequence">
+      <filter>
+        <condition attribute="gyde_workitemtemplatesequenceid" operator="eq" value="${sequenceId}" uiname="Account Categories" uitype="gyde_workitemtemplatesequence" />
+      </filter>
+      <link-entity name="gyde_surveyworkitem" from="gyde_surveyworkitemid" to="gyde_workitem">
+        <attribute name="gyde_title" />
+        <attribute name="gyde_workitemid" />
+        <attribute name="gyde_surveyworkitemid" />
+      </link-entity>
+    </entity>
+  </fetch>`;
+
+      // await window.parent.Xrm.Page.ui._formContext.getAttribute("gyde_relatedsurveyitem").setRequiredLevel("required");
+      /* Set survey item filter */
+      const workitemRelationshipList = await window.parent.Xrm.WebApi.retrieveMultipleRecords("gyde_workitemtemplatesequence", fetchXml)
+      console.log("workitemRelationshipList", workitemRelationshipList);
+
+      // return { error: false, data: surveyList?.entities }
+    // const filterResult = workitemRelationshipList?.entities?.filter(
+    //   (entities: any) =>
+    //     (entities?.gyde_itemtype === dbConstants?.common?.item_type_answer ||
+    //       entities?.gyde_itemtype === dbConstants?.common?.item_type_question) &&
+    //     entities?.gyde_isusedincreationrule
+    // )
+      return { error: false, workitemId: workitemRelationshipList.entities[0]["gyde_surveyworkitem1.gyde_surveyworkitemid"]}
+    } catch (e) {
+      console.log("Work Item Item Relationship Error", e);
+      return { error: true, data: []
+    }
+    }
+}
+  
+
 
 export const getWorkItemRelationshipByWorkitemId = async (workItemId: any): Promise<any> => {
   try {
@@ -354,10 +401,10 @@ export const xrmDeleteRequest = async (entityName: any, ids: any) : Promise<any>
   console.log("entity ids", ids);
   try {
     if (ids && ids?.length) {
-      ids.forEach(async (id: any) => {
-        console.log("Delete XML", id)
-       await window.parent.Xrm.WebApi.deleteRecord(entityName, id)
-      })
+      for (const id of ids) {
+        console.log("Delete XML", id);
+        await window.parent.Xrm.WebApi.deleteRecord(entityName, id);
+      }
     }
     // await Promise.all(promiseArray);
     return {

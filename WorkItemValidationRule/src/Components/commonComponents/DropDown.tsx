@@ -13,7 +13,6 @@ interface DropDownCommonProps {
 const DropDown: React.FC<DropDownCommonProps> = ({ dropDownData, isDisabled, setExpression, changedId, fieldName, selectedValue }) => {
 
   useEffect(() => {
-    console.log("selectedValue === 'con'", selectedValue)
   }, [selectedValue])
 
   const onChangeEvent = (option: any) => {
@@ -22,17 +21,14 @@ const DropDown: React.FC<DropDownCommonProps> = ({ dropDownData, isDisabled, set
   }
 
   const searchFilterSort = (optionA: any, optionB: any) => {
-    console.log("Drop orppPPPP", optionA, optionB);
     return (optionA?.label ?? '')?.toLowerCase().localeCompare((optionB?.label ?? '')?.toLowerCase());
 }
 
 const searchFilterOption = (input: any, option: any) => {
-    console.log(" Drop orppPP option", input, option);
     return (option?.label ?? '')?.toLowerCase()?.includes(input?.toLowerCase())
 }
 
   useEffect(() => {
-    console.log("fieldNamefieldName", fieldName)
   }, [fieldName])
   return (
     <div>
