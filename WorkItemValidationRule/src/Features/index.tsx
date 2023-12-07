@@ -4,7 +4,7 @@ import {
   findAndUpdateLastNestedIf,
   removeIfKeyAndGetDbProperty
 } from "../Utils/logics.utils";
-import { Button, notification, Space, Spin } from "antd";
+import { Button, notification, Radio, Space, Spin, Modal } from "antd";
 import SectionContainer from "./sectionContainer";
 import {
   getCurrentState,
@@ -20,11 +20,17 @@ import {
   xrmDeleteRequest,
   reloadPage,
   getListAnswersByQuestionId,
+  loadResourceString,
+  updateDataRequest,
 } from "../XRMRequests/xrmRequests";
 import { dbConstants } from "../constants/dbConstants";
 import { normalConverter } from "../Utils/dbFormatToJson";
 import { hasNullFields } from "../Utils/utilsHelper";
 import PickServeyContainer from "./pickServeyContainer";
+import { languageConstantsForCountry } from "../constants/languageConstants";
+import countryMappedConfigs from "../configs/countryMappedConfigs";
+import { ExclamationCircleFilled } from "@ant-design/icons";
+const { confirm } = Modal;
 
 const ParentComponent = ({
   imageUrl,
@@ -65,8 +71,11 @@ const ParentComponent = ({
   const [relationships, setRelationships] = useState<any[]>([]);
   const [initialLoadWithNoSurvey, setInitialLoadWithNoSurvey] = useState<any>(false);
   const [disableSaveButton, setDisableSaveButton] = useState<any>(false);
-
-
+  const [languageConstants, setLanguageConstants] = useState<any>(
+    languageConstantsForCountry.en
+  );
+  const [selectedLanguage, setSelectedLanguage] = useState<any>('en');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   // const [deleteSectionKey, setDeleteSectionKey] = useState<any>();
   const [validation, setValidation] = useState<any>({
     minMaxValidation: true,
@@ -88,6 +97,8 @@ const ParentComponent = ({
 
     setIsNested(false);
   };
+
+
 
   const loadQuestionHandler = async (selectedSurvey: any) => {
     setIsApiDataLoaded(true);
@@ -151,6 +162,35 @@ const ParentComponent = ({
     console.log("_nestedRows", _nestedRows)
   }, [_nestedRows]);
 
+  const messageHandler = async () => {
+    try {
+      const languageConstantsFromResTable = await loadResourceString();
+      if (languageConstantsFromResTable?.data && languageConstants?.length) {
+        console.log("languageConstantsFromResTable 2", languageConstantsFromResTable);
+        const mergedObject = languageConstantsFromResTable?.data.reduce((result: any, currentObject: any) => {
+          return Object.assign(result, currentObject);
+        }, {});
+        if (Object.keys(mergedObject).length) {
+          const originalConstants = languageConstants[0];
+          const updatedValues = mergedObject[0];
+  
+          for (const key in updatedValues) {
+            if (key in updatedValues && key in originalConstants) {
+              originalConstants[key] = updatedValues[key];
+            }
+          }
+          setLanguageConstants(originalConstants);
+        }
+      }
+    } catch (error) {
+      console.log('error ====>', error);
+    }
+  }
+  
+
+  useEffect(() => {
+    console.log("languageConstants", languageConstants)
+  }, [languageConstants])
   // for retrieve purpose
   useEffect(() => {
     setSections(
@@ -160,6 +200,7 @@ const ParentComponent = ({
         .map((key: any) => ({ key: parseInt(key) }))
     );
     _getCurrentState();
+    messageHandler();
     console.log(
       "imageUrl, imageUrl1, imageUrl2",
       imageUrl,
@@ -439,10 +480,10 @@ const ParentComponent = ({
     const result = await saveRequest(logicalName, currentPossitionDetails?.id, {
       [dbConstants.common.gyde_visibilityrule]:
         // JSON.stringify(visibilityRule),
-        Object.keys(visibilityRule).length === 0 ? null : JSON.stringify(visibilityRule)
+        Object.keys(visibilityRule).length === 0 ? "" : JSON.stringify(visibilityRule)
     });
     if (result?.data) {
-      openNotificationWithIcon(result?.data?.error ? "error" : "success", result?.data?.error ? "Error Occured!" : "Data Saved!");
+      openNotificationWithIcon(result?.data?.error ? "error" : "success", result?.data?.error ? languageConstants?.ExpressionBuilder_ErrorOccured : languageConstants?.ExpressionBuilder_DataSaved);
     }
 
     await handleRelationshipEntity(); 
@@ -452,27 +493,35 @@ const ParentComponent = ({
     let _prepareForRelationship: any;
     let relationshipCreationArray: any = [];
 
-    // const existanceRelationshipIds = relationships?.map(rela => {
-    //   const nameLbl = rela?.gyde_name?.split('-');
-    //   console.log("extractedString nameLbl", nameLbl);
-    //   if (rela?.gyde_itemtype === dbConstants?.common?.item_type_question && nameLbl?.length > 1) {
-    //       const extractedString = nameLbl[0].trim();
-    //       console.log("extractedString", extractedString);
-    //       return extractedString;
-    //   }
-    // })?.filter(x => x);
+    const existanceRelationshipIds = relationships?.map(rela => {
+      const nameLbl = rela?.gyde_name?.split('-');
+      console.log("extractedString nameLbl", nameLbl);
+      if (rela?.gyde_itemtype === dbConstants?.common?.item_type_question && nameLbl?.length > 1) {
+          const extractedString = nameLbl[0].trim();
+          console.log("extractedString", extractedString);
+          return extractedString;
+      }
+    })?.filter(x => x);
 
+    console.log("existanceRelationshipIds", existanceRelationshipIds)
     for (const sec of _nestedRows) {
       console.log("SECCCCCCCC", sec);
-      let answerObject: any = {};
-      let questionObject: any = {};
+
       const key = Object.keys(sec)[0];
       _prepareForRelationship = JSON.parse(JSON.stringify(sec[key].fields));
     
       await Promise.all(_prepareForRelationship?.map(async (relField: any) => {
         let selectedValue: any = questionList?.find((x: { value: any; }) => x?.value === relField?.field);
+        let answerObject: any = {};
+        let questionObject: any = {};
         console.log("selectedValue xxxxxxx ", selectedValue);
         if (selectedValue?.questionType === "List") {
+          console.log("RELATIONSHIPSSS", relationships);
+          const relationshipSets = relationships?.map((set: any) => {
+            set?.gyde_name
+          });
+          console.log("RELATIONSHIPSSS", relationshipSets);
+
           const response = await getListAnswersByQuestionId(selectedValue?.questionId);
           let listAnswers = [];
     
@@ -485,27 +534,32 @@ const ParentComponent = ({
           console.log("Relationship List Answers", listAnswers);
 
           if (listAnswers[0]?.value) {
-            answerObject = {
+            if (relField?.condition !== 'con') {
+              answerObject = {
+                "label": selectedValue?.label,
+                "value": listAnswers?.length > 0 ? listAnswers[0]?.value : selectedValue?.value, // Set the value based on availability
+                "questionType": selectedValue?.questionType,
+                "questionId": selectedValue?.questionId,
+                "sectionId": selectedValue?.sectionId,
+                "status": selectedValue?.status,
+                "internalId": selectedValue?.internalId,
+                "options": listAnswers[0]?.value
+              };
+            }
+          }
+          if (!existanceRelationshipIds?.includes(selectedValue?.questionId)) {
+            questionObject = {
               "label": selectedValue?.label,
-              "value": listAnswers.length > 0 ? listAnswers[0]?.value : selectedValue?.value, // Set the value based on availability
+              "value": selectedValue?.label, // Set the value based on availability
               "questionType": selectedValue?.questionType,
               "questionId": selectedValue?.questionId,
               "sectionId": selectedValue?.sectionId,
               "status": selectedValue?.status,
               "internalId": selectedValue?.internalId,
-              "options": listAnswers[0]?.value
+              "usedInCreationRule": relField?.condition === 'con' ? true : "false"
             };
           }
-          questionObject = {
-            "label": selectedValue?.label,
-            "value": selectedValue?.label, // Set the value based on availability
-            "questionType": selectedValue?.questionType,
-            "questionId": selectedValue?.questionId,
-            "sectionId": selectedValue?.sectionId,
-            "status": selectedValue?.status,
-            "internalId": selectedValue?.internalId,
-            "usedInCreationRule": "false"
-          };
+         
           if (Object.keys(answerObject)?.length !== 0) {
             relationshipCreationArray.push(answerObject);
           }
@@ -529,6 +583,15 @@ const ParentComponent = ({
       await createRelationshipForWI(currentPossitionDetails?.id, relationshipCreationArray);
     }
     
+    const sectionOrChapterRelationships = relationships?.filter(x => x["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] === "Chapter" || x["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] === "Section");
+    console.log("sectionOrChapterRelationships", sectionOrChapterRelationships);
+    if (sectionOrChapterRelationships && sectionOrChapterRelationships?.length) {
+      let record : any = {};
+      record["gyde_isusedincreationrule"] = false; 
+      for (const relat of sectionOrChapterRelationships) {
+        await updateDataRequest(dbConstants?.common?.gyde_surveyworkitemrelatedsurveyitem, relat?.gyde_surveyworkitemrelatedsurveyitemid, record);
+      }
+    }
     setTimeout(async () => {
       await _getWorkItemRelationshipByWorkitemId();
       await reloadPage();
@@ -588,11 +651,21 @@ const ParentComponent = ({
     // await reloadPage();
     // setDisableSaveButton(false);
   }
+
+  const languageChangeHandler = (e: any) => {
+    console.log("EEEEcdsefef", e)
+    setSelectedLanguage(e?.target?.value);
+    setLanguageConstants(languageConstantsForCountry[e?.target?.value]);
+  }
+
+
   const handleSaveLogic = async () => {
     let visibilityRuleNormal: any = [];
     let _prepareForRelationship;
     let deleteRelationshipIds: any;
     let fieldsLables: any;
+
+    let findNullFields = false
     setDisableSaveButton(true);
 
     _nestedRows.forEach((sec: any) => {
@@ -604,15 +677,34 @@ const ParentComponent = ({
       console.log("prepareForValidation", prepareForValidation);
       const _hasNullFields = hasNullFields(prepareForValidation);
       if (_hasNullFields) {
-        openNotificationWithIcon("error", "Fields cannot be empty!");
+        // openNotificationWithIcon("error", languageConstants?.ExpressionBuilder_FieldsEmpty);
+        findNullFields = true;
         return;
       }
       fieldsLables = _prepareForRelationship?.map((x: any) => x?.field);
       console.log("fieldsLables", fieldsLables);
-      const _visibility : any = convertJSONFormatToDBFormat(sec[key], true);
-      console.log("_visibility", _visibility);
-      visibilityRuleNormal.push(_visibility);
+      // const _filterFieldsForWI = sec[key]?.fields?.filter((x: any) => x?.condition !== 'con');
+      // console.log("_filterFieldsForWI", _filterFieldsForWI);
+      // if (_filterFieldsForWI && _filterFieldsForWI?.length) {
+        let _visibility : any = convertJSONFormatToDBFormat(sec[key], true);
+      console.log("_visibility before", _visibility);
+      
+      if (_visibility) {
+        const firstKey : any = Object.keys(_visibility) 
+        _visibility = _visibility[firstKey]?.filter((x: any) => x?.if?.length !== 3)
+        if(_visibility?.length) visibilityRuleNormal.push({[firstKey]: _visibility });
+      }
+
+      // }
+      console.log("_visibility After", visibilityRuleNormal);
+
     });
+
+    if (findNullFields) {
+      openNotificationWithIcon("error", languageConstants?.ExpressionBuilder_FieldsEmpty);
+      setDisableSaveButton(false);
+      return;
+    }
 
     // deleteRelationshipIds = relationships?.filter(rela => {
     //   const nameLbl = rela?.gyde_name?.split('-');
@@ -628,7 +720,7 @@ const ParentComponent = ({
     //       }
     //     }
     // })?.map(x => x?.gyde_surveyworkitemrelatedsurveyitemid);
-    deleteRelationshipIds = relationships?.map(x => x?.gyde_surveyworkitemrelatedsurveyitemid);
+    deleteRelationshipIds = relationships?.filter(y => y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] === "Question" || y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] === "Answer")?.map(x => x?.gyde_surveyworkitemrelatedsurveyitemid);
     console.log("deleteRelationshipIds 1", deleteRelationshipIds);
     // if (deleteRelationshipIds?.length) {
     //   console.log("deleteRelationshipIds 2", deleteRelationshipIds)
@@ -660,6 +752,7 @@ const ParentComponent = ({
         savedVisibilityRuleFinalFormat ? savedVisibilityRuleFinalFormat : {},
       )
     }
+    setDisableSaveButton(false);
   };
 
   useEffect(() => {
@@ -673,7 +766,8 @@ const ParentComponent = ({
       const survey = surveyList?.find(x => x?.gyde_name === questionDetails?.data["_gyde_surveytemplate_value@OData.Community.Display.V1.FormattedValue"]);
       console.log("DGDDDSSSS", survey);
       if(survey?.gyde_surveytemplateid) setSelectedSurvey(survey?.gyde_surveytemplateid)
-      if(!survey) setInitialLoadWithNoSurvey(true)
+      if (!survey) setInitialLoadWithNoSurvey(true)
+      else setInitialLoadWithNoSurvey(false);
     } else {
       setInitialLoadWithNoSurvey(false)
     }
@@ -697,18 +791,73 @@ const ParentComponent = ({
     }
   }, [selectedSurvey]);
 
+  useEffect(() => {
+    console.log("languageConstantsppppp", languageConstants)
+  }, [languageConstants])
+
+  const resetWorkItemExpression = () => {
+    setIsModalOpen(true);
+  }
+  function handleOk(e: any) {
+    console.log("HAND:E CONFIRM")
+  }
+
+  function handleCancel(e: any) {
+    console.log("HAND:E CANCEL")
+  }
+
+
+  const clearItems = async (): Promise<void> => {
+    const deleteRelationshipIds = relationships?.filter(y => y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] === "Question" || y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] === "Answer")?.map(x => x?.gyde_surveyworkitemrelatedsurveyitemid);
+    console.log("deleteRelationshipIds 1", deleteRelationshipIds);
+    const deleteResult = await xrmDeleteRequest(dbConstants?.common?.gyde_surveyworkitemrelatedsurveyitem, deleteRelationshipIds);
+    if (!deleteResult?.error) {
+      await saveVisibilityData({});
+      _setNestedRows(null)
+    }
+  }
+
+  const showPromiseConfirm: any = async () => {
+    confirm({
+      title: 'Do you want to clear the creation rule?',
+      icon: <ExclamationCircleFilled />,
+      content: 'When the OK button is clicked, all the relationships associated with the creation rule will be deleted.',
+      onOk() {
+        return clearItems();
+      },
+      onCancel() {},
+    });
+  };
   return (
     <div>
       {contextHolder}
-      <div></div>
+      {/* <div className="country-lan">
+        <Radio.Group
+          options={countryMappedConfigs}
+          onChange = { (e: any) => languageChangeHandler(e)}
+          value={selectedLanguage}
+          optionType="button"
+          buttonStyle="solid"
+      />
+
+      </div> */}
       {!isApiDataLoaded ? (
         <div className="validation-wrap">
           {
             (initialLoadWithNoSurvey || (selectedSurvey && !surveyList?.some(e => e.gyde_surveytemplateid === selectedSurvey))) &&
             <div className="validation-text mb-15"> 
-                * Selected Survey Not Exists in the workitem template
+                {/* * Selected Survey Not Exists in the workitem template */}
+                {`* ` + languageConstants?.ExpressionBuilder_SurveyExistsWIT}
             </div>
           }
+          <div style={{textAlign:'right', position:'relative', top: '33px', marginRight:'13px'}}>
+          <Space wrap>
+            <Button onClick={showPromiseConfirm}>Reset</Button>
+             
+          </Space>
+          </div>
+          
+        
           {((currentPossitionDetails && surveyList?.length) || localTest) && (
             
             <div>
@@ -720,7 +869,8 @@ const ParentComponent = ({
                     setSelectedSurvey={setSelectedSurvey}
                     selectedSurvey={selectedSurvey}
                     _nestedRows={_nestedRows}
-                    handleSectionRemove={handleSectionRemove}
+                      handleSectionRemove={handleSectionRemove}
+                      languageConstants={languageConstants}
                   />
               </div>
               }
@@ -732,7 +882,7 @@ const ParentComponent = ({
                     className="mr-10 btn-default"
                     onClick={addComponent}
                     disabled={suerveyIsPublished || _nestedRows?.length > 0}>
-                    + Add
+                     {`+ ${languageConstants?.ExpressionBuilder_AddButton}`}
                   </Button>
                 </div>
                 {sections?.length > 0 && questionList?.length > 0 &&
@@ -752,6 +902,7 @@ const ParentComponent = ({
                         suerveyIsPublished={suerveyIsPublished}
                         handleSectionRemove={handleSectionRemove}
                         setQuestionsForRelationship={setQuestionsForRelationship}
+                        languageConstants={languageConstants}
                       />
                     </div>
                   ))}
@@ -762,8 +913,9 @@ const ParentComponent = ({
                       className="mr-10 btn-primary"
                       disabled={disableSaveButton || suerveyIsPublished}
                     >
-                      Save
-                      
+                      {/* Save */}
+                      {languageConstants?.ExpressionBuilder_SaveButtonConstants}
+
                     </Button>
                   </div>
               
@@ -776,7 +928,7 @@ const ParentComponent = ({
       ) : (
         <Space size="middle">
           <div>
-            <div>Questions Loading!</div>
+            <div>{languageConstants?.ExpressionBuilder_QuestionsLoadingConstants}</div>
               <div style={{marginTop: '10px'}}>
               <Spin />
             </div>

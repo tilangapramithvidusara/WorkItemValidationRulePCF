@@ -213,7 +213,7 @@
 .validation-wrap .remove-text {
   font-size: 14px;
   color: rgb(51, 51, 51);
-  vertical-align: middle;
+  /* vertical-align: middle; */
   margin-left: 5px;
   margin-right: 5px;
 }

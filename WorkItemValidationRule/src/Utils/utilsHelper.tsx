@@ -308,18 +308,11 @@ const _updateExpressionByParentId = (
 const hasNullFields = (obj: any) => {
 
   return obj?.some((x: any) => {
-    // if (x?.innerConditions) {
-      // if (!x?.value || !x?.expression || !x.value || !x.condition) {
-      //   return true; // Found a null or undefined field
-      // } else {
-    //     return hasNullFields(x.innerConditions); // Recursively check innerConditions array
-    //   }
-    // }
     console.log("Validation saving", x);
     if (x?.condition !== 'con') {
-      if(!x?.value) return true
+      if((!x?.value && x?.value !== 0)) return true
     }
-    if (!x?.expression || !x?.field) {
+    if (!x?.expression || !x?.field || !x?.condition) {
       return true; // Found a null or undefined field
     }
   });

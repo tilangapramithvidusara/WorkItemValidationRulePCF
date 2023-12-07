@@ -2,6 +2,7 @@ import * as React from "react";
 import operationsSampleData from '../SampleData/sampleInputQuestion';
 import { dbConstants } from "../constants/dbConstants";
 import { LogicNewSample, questionArraySample } from "../SampleData/SampleLogicData";
+import { filterKeys } from "../constants/filterKeys";
 
 declare global {
   interface Window {
@@ -66,7 +67,7 @@ export const getWorkItemId = async() => {
     const currentPosition = await window.parent.Xrm.Page.ui._formContext._entityName;
     console.log("CURRR POS", currentPosition);
     let workItemId
-    if (currentPosition === 'gyde_surveytemplate') {
+    if (currentPosition?.includes('gyde_surveytemplate')) {
       const paneIdObj = await window.parent.Xrm.App.sidePanes.getAllPanes()._collection;
       const sequenceId = Object.keys(paneIdObj)[0]
       const res = await getWorkItemIdBySequenceId(sequenceId);
@@ -254,16 +255,29 @@ export const getSurveyListByWorkItemId = async (workItemId: any): Promise<any> =
   try {
     // let workItemId = await window.parent.Xrm.Page.ui.formContext.data.entity.getId().replace("{", "").replace("}", "");
     // let workItemId = "322A7003-514D-EE11-BE6F-6045BDD0EF22";
+  //   let fetchXml = `?fetchXml=<fetch top='50'>
+  //   <entity name='gyde_surveytemplate'>
+  //     <attribute name='gyde_surveytemplateid' />
+  //     <attribute name='gyde_name' />
+  //     <filter>
+  //       <condition attribute='statuscode' operator='in' >
+  //         <value>1</value>
+  //         <value>528670001</value>
+  //       </condition>
+  //     </filter>
+  //     <link-entity name='gyde_workitemtemplate' from='gyde_workitemtemplateid' to='gyde_workitemtemplate'>
+  //       <link-entity name='gyde_workitemtemplatesequence' from='gyde_workitemtemplate' to='gyde_workitemtemplateid'>
+  //         <filter>
+  //           <condition attribute='gyde_workitem' operator='eq' value='${workItemId}' />
+  //         </filter>
+  //       </link-entity>
+  //     </link-entity>
+  //   </entity>
+  // </fetch>`
       let fetchXml = `?fetchXml=<fetch top='50'>
         <entity name='gyde_surveytemplate'>
           <attribute name='gyde_surveytemplateid' />
           <attribute name='gyde_name' />
-          <filter>
-            <condition attribute='statuscode' operator='in' >
-              <value>1</value>
-              <value>528670001</value>
-            </condition>
-          </filter>
           <link-entity name='gyde_workitemtemplate' from='gyde_workitemtemplateid' to='gyde_workitemtemplate'>
             <link-entity name='gyde_workitemtemplatesequence' from='gyde_workitemtemplate' to='gyde_workitemtemplateid'>
               <filter>
@@ -281,7 +295,7 @@ export const getSurveyListByWorkItemId = async (workItemId: any): Promise<any> =
       // return { error: false, data: surveyList?.entities }
       return { error: false, data:surveyList?.entities}
     } catch (e) {
-      console.log("Create Work Item Relationship Error", e);
+      console.log("Fetch Survey Lists Error", e);
       return { error: true, data: []
     }
     }
@@ -355,10 +369,11 @@ export const getWorkItemRelationshipByWorkitemId = async (workItemId: any): Prom
 
       // return { error: false, data: surveyList?.entities }
     const filterResult = workitemRelationshipList?.entities?.filter(
-      (entities: any) =>
-        (entities?.gyde_itemtype === dbConstants?.common?.item_type_answer ||
-          entities?.gyde_itemtype === dbConstants?.common?.item_type_question) &&
-        entities?.gyde_isusedincreationrule
+      (entities: any) => entities
+        // entities?.gyde_itemtype === dbConstants?.common?.item_type_answer ||
+        //   entities?.gyde_itemtype === dbConstants?.common?.item_type_question
+        // &&
+        // entities?.gyde_isusedincreationrule
     )
       return { error: false, data: filterResult}
     } catch (e) {
@@ -384,13 +399,20 @@ export const getQuestionInfoByQuestionName = async (questionName: any): Promise<
       // await window.parent.Xrm.Page.ui._formContext.getAttribute("gyde_relatedsurveyitem").setRequiredLevel("required");
       /* Set survey item filter */
       const questionDetails = await window.parent.Xrm.WebApi.retrieveMultipleRecords("gyde_surveytemplatechaptersectionquestion", fetchXml); 
-      console.log("questionDetails", questionDetails)
-    return { error: false, data: questionDetails?.entities?.length ? questionDetails?.entities[0] : null }
+    console.log("questionDetails", questionDetails);
+
+    const surveyName = questionName?.split("_")[0];
+    console.log("surveyName", surveyName);
+    questionDetails["_gyde_surveytemplate_value@OData.Community.Display.V1.FormattedValue"]
+    const findSurveyName = questionDetails?.entities?.find((suv: any) => suv["_gyde_surveytemplate_value@OData.Community.Display.V1.FormattedValue"] === surveyName);
+    console.log("findSurveyName", findSurveyName);
+
+    return { error: false, data: findSurveyName }
     } catch (e) {
       console.log("Create Work Item Relationship Error", e);
     return {
       error: true, data: {}
-    }
+      }
     }
 }
 
@@ -435,3 +457,40 @@ export const reloadPage = async () : Promise<any> =>{
   }
   }
 }
+
+export const loadResourceString = async () : Promise<any> => {
+
+  const url = await window.parent.Xrm.Utility.getGlobalContext().getClientUrl();
+  const language = await window.parent.Xrm.Utility.getGlobalContext().userSettings.languageId
+  const webResourceUrl = `${url}/WebResources/gyde_localizedstrings.${language}.resx`;
+  const mapper: any = [];
+
+  try {
+    const response = await fetch(`${webResourceUrl}`);
+    const data = await response.text();
+    console.log("Web Res Dataaa", data);
+    console.log("Filter Keyssss", filterKeys);
+    filterKeys?.map((filterKey: string, index: number) => {
+      const parser = new DOMParser();
+      // Parse the XML string
+      const xmlDoc = parser.parseFromString(data, "text/xml");
+      // Find the specific data element with the given key
+      const dataNode: any = xmlDoc.querySelector(`data[name="${filterKey}"]`);
+      // Extract the value from the data element
+      const value: any = dataNode?.querySelector("value").textContent;
+      console.log('data ====> ', index, value); 
+      if (index && value) {
+        mapper.push({ [filterKey]: value });
+      }
+    });
+    
+    return {
+      error: false, data: mapper
+    }
+  } catch (e) {
+    console.log("Language Translation Error", e);
+    return {
+      error: true, data: {}
+    }
+  }
+  }

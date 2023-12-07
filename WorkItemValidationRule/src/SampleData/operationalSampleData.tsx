@@ -7,7 +7,7 @@ export const operationalSampleData: any[] = [{
         { label: "GreaterThanOrEqual", value: ">=" }, 
         { label: "LessThanOrEqual", value: "<=" },
         { label: "NotEqualTo", value: "!=" },
-        { label: "Contains", value: "con" }
+        { label: "Visible", value: "con" }
     ],
 }];
 

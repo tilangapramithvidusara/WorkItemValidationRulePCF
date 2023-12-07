@@ -52,6 +52,7 @@ interface TableRowProps {
   imageUrls: any;
   suerveyIsPublished: any;
   setQuestionsForRelationship: any;
+  languageConstants: any;
 }
 
 interface Condition {
@@ -78,7 +79,8 @@ const RowContainer: React.FC<TableRowProps> = ({
   handleSectionRemove,
   imageUrls,
   suerveyIsPublished,
-  setQuestionsForRelationship
+  setQuestionsForRelationship,
+  languageConstants
 }) => {
   const [nestedRows, setNestedRows] = useState<React.ReactNode[]>([]);
   const [collapse, setCollapse] = useState<any>({ state: false, fieldId: 0 });
@@ -95,7 +97,12 @@ const RowContainer: React.FC<TableRowProps> = ({
   const [listAnsersWithQuestionIds, setListAnsersWithQuestionIds] = useState<any>();
   const [listQuestionIds, setListQuestionIds]  = useState<any>();
   const [listQuestionLoading, setListQuestionLoading]  = useState<any>(false);
+  const [dropDownValueToNull, setDropDownValueToNull] = useState<any>(false);
+  const [_selectedValue, _setSelectedValue] = useState<any>(null);
 
+  const handleResetSelection = () => {
+    _setSelectedValue(null); // Set the selected value to null
+  };
   const findConditionByLevel = (
     level: any,
     conditions: any
@@ -270,7 +277,7 @@ const RowContainer: React.FC<TableRowProps> = ({
 
     if (fieldValue?.fieldName === "field") {
       const resss: any = fetchFieldData(fieldValue?.input);
-     
+      handleResetSelection();
       // When the field value get change need to empty value field
       let _fieldValue: any = fieldValue;
       _fieldValue.input = " ";
@@ -711,7 +718,7 @@ const RowContainer: React.FC<TableRowProps> = ({
                   }}
                 >
                   <div className="mr-20">
-                    <div className="condition-label-andor">And/Or </div>
+                    <div className="condition-label-andor">{languageConstants?.ExpressionBuilder_AndorLabel}</div>
                     <DropDown
                       dropDownData={expressionSampleData}
                       isDisabled={
@@ -730,7 +737,7 @@ const RowContainer: React.FC<TableRowProps> = ({
 
                   {
                     !isLoad ? <div className="mr-20">
-                    <div className="condition-label">Field </div>
+                    <div className="condition-label">{languageConstants?.ExpressionBuilder_FieldLabel} </div>
                     <FieldInput
                       sampleData={
                         dropDownQuestionList && dropDownQuestionList.length && dropDownQuestionList?.filter((x: { status: string; }) => x?.status === "A")
@@ -744,14 +751,14 @@ const RowContainer: React.FC<TableRowProps> = ({
                     />{" "}
                     </div> :
                       <div className="mr-20">
-                        <div className="condition-label">Field </div>
+                        <div className="condition-label">{languageConstants?.ExpressionBuilder_FieldLabel} </div>
                           <Space size="middle">
                             <Spin />
                           </Space>
                       </div>
                   }
                   <div className="mr-20">
-                    <div className="condition-label">Operator</div>
+                    <div className="condition-label">{languageConstants?.ExpressionBuilder_OperatorLabel}</div>
                     {dropDownQuestionList?.find(
                       (x: { value: string }) => x?.value === condition?.field
                     )?.questionType ===
@@ -824,7 +831,7 @@ const RowContainer: React.FC<TableRowProps> = ({
                     )}
                   </div>
                   <div className="mr-20">
-                    <div className="condition-label">Value </div>
+                    <div className="condition-label">{languageConstants?.ExpressionBuilder_ValueLabel} </div>
                     {
                       condition?.condition === 'con' ?
                         <FieldStringInputProps
@@ -888,17 +895,14 @@ const RowContainer: React.FC<TableRowProps> = ({
                           )?.questionType ===
                           dbConstants.questionTypes.listQuestion ? (
                           <ListDropDown
-                            dropDownData={{}}
-                            isDisabled={
-                              suerveyIsPublished ? suerveyIsPublished : false
-                            }
-                            setFieldValue={setFieldValue}
-                            changedId={condition?.level}
-                            fieldName={"value"}
-                            selectedValue={condition?.value}
-                            listDropDownData={answersDropDownData.concat(listAnsersWithQuestionIds?.find((x: any) => x?.questionId === condition?.field)?.listAnswers)?.filter(x => x)}
-                                    
-                          />
+                                    dropDownData={{}}
+                                    isDisabled={suerveyIsPublished ? suerveyIsPublished : false}
+                                    setFieldValue={setFieldValue}
+                                    changedId={condition?.level}
+                                    fieldName={"value"}
+                                    selectedValue={condition?.value}
+                                    listDropDownData={answersDropDownData.concat(listAnsersWithQuestionIds?.find((x: any) => x?.questionId === condition?.field)?.listAnswers)?.filter(x => x)}
+                                  />
                         ) : dropDownQuestionList?.find(
                           (x: { value: string }) => x?.value === condition?.field
                         )?.questionType === dbConstants.questionTypes.dateTimeQuestion ? (
@@ -923,36 +927,10 @@ const RowContainer: React.FC<TableRowProps> = ({
                             isDisabled={suerveyIsPublished}
                           />
                         )}
-                      
-                    
                   </div>
-
-                  {/* <div className="custom-btn-wrap">
-                    <Button
-                      className="btn-default"
-                      onClick={() => _handleDeleteRow(condition?.level)}
-                      disabled={
-                        suerveyIsPublished
-                          ? suerveyIsPublished
-                          : condition?.level === 1
-                          ? true
-                          : false
-                      }
-                    >
-                      {" "}
-                      Remove
-                    </Button>
-                  </div> */}
-
                   <div className="custom-btn-wrap">
                       {
                         (suerveyIsPublished || condition?.level === 1) ?
-                          // <img
-                          //   // src={imageUrls?.imageUrl} alt="icon"
-                          //   width={'15px'}
-                          //   height={'15px'}
-                          // >
-                          // </img>
                           <></>
                           :
                           <div className="flex-wrap">  
@@ -962,7 +940,7 @@ const RowContainer: React.FC<TableRowProps> = ({
                             height={'15px'}
                             onClick={() => _handleDeleteRow(condition?.level)}
                             />
-                            <span className="remove-text">Remove </span>
+                            <span className="remove-text">{languageConstants?.ExpressionBuilder_RemoveButton} </span>
                           </div>
                          
                       }
@@ -980,7 +958,9 @@ const RowContainer: React.FC<TableRowProps> = ({
                         }
                         disabled={suerveyIsPublished}
                       >
-                        + Add
+                      {/* + Add */}
+                      {/* {languageConstants?.addButton}  */}
+                      {`+ ${languageConstants?.ExpressionBuilder_AddButton}`}
                       </Button>
                     </div> :
                     <div>
@@ -1054,17 +1034,6 @@ const RowContainer: React.FC<TableRowProps> = ({
           </div>
           <div style={{ textAlign: "right", marginBottom: "10px" }}>
             {" "}
-            {/* {showActionOutput && "{ " + showActionOutput + " }"}{" "} */}
-            {/* <div className="flex-end-wrap">
-              <Button
-                className="btn-default"
-                onClick={() => handleSectionRemove(sectionLevel)}
-                disabled={suerveyIsPublished}
-              >
-                {" "}
-                Remove Section
-              </Button>
-            </div> */}
            { suerveyIsPublished ?
                 <img
                   src={imageUrls?.imageUrl} alt="icon"
@@ -1078,7 +1047,7 @@ const RowContainer: React.FC<TableRowProps> = ({
                 onClick={() => handleSectionRemove(sectionLevel)} 
                       // onClick={() => handleSectionRemove(sectionLevel)}
                         /> 
-                <span className="remove-text">Remove </span>
+                <span className="remove-text">{languageConstants?.ExpressionBuilder_RemoveWIButton}</span>
                 
                   </div>
                 }

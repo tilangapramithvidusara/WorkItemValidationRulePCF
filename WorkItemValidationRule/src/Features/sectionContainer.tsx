@@ -37,6 +37,7 @@ interface SectionProps {
   suerveyIsPublished: any;
   handleSectionRemove: any;
   setQuestionsForRelationship: any;
+  languageConstants: any;
 }
 
 function SectionContainer({
@@ -52,7 +53,8 @@ function SectionContainer({
   imageUrls,
   suerveyIsPublished,
   handleSectionRemove,
-  setQuestionsForRelationship
+  setQuestionsForRelationship,
+  languageConstants
 }: SectionProps) {
   const [rowData, setRowData] = useState<any>();
   const [rows, setRows] = useState<Row[]>([
@@ -121,6 +123,7 @@ function SectionContainer({
           imageUrls={imageUrls}
           suerveyIsPublished={suerveyIsPublished}
           setQuestionsForRelationship={setQuestionsForRelationship}
+          languageConstants={languageConstants}
         />
       ))}
     </div>

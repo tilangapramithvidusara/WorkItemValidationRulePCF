@@ -41,8 +41,9 @@ const FieldInput: React.FC<NumberInputField> = ({
   return (
     <div>
       <InputNumber
-        formatter={numberFormatter}
-        parser={numberParser}
+        type="number"
+        // formatter={numberFormatter}
+        // parser={numberParser}
         disabled={defaultDisabled ? defaultDisabled : false}
         style={{ width: "100%" }}
         onChange={(value) => setInputNumber({ input: value, changedId, fieldName })}

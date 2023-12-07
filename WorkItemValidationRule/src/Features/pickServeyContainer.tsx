@@ -1,5 +1,6 @@
 import { Select } from "antd";
 import React, { useEffect, useState } from "react";
+import { languageConstantsForCountry } from "../constants/languageConstants";
 interface NestedRowProps {
   children: React.ReactNode;
 }
@@ -11,6 +12,7 @@ interface SectionProps {
   selectedSurvey: any;
   _nestedRows: any;
   handleSectionRemove: any;
+  languageConstants: any
 }
 
 function PickServeyContainer({
@@ -18,7 +20,8 @@ function PickServeyContainer({
   setSelectedSurvey,
   selectedSurvey,
   _nestedRows,
-  handleSectionRemove
+  handleSectionRemove,
+  languageConstants
 }: SectionProps) {
   
   const onChange = (value: string) => {
@@ -49,7 +52,8 @@ function PickServeyContainer({
       display: 'flex'
     }}>
       <div className="pcklbl mb-32">
-        Pick Survey : 
+        {/* Pick Survey :  */}
+        {languageConstants?.ExpressionBuilder_PickSurvey + ` :`}
       </div>
       <div>
       <Select

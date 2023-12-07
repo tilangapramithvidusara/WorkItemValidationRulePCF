@@ -229,10 +229,13 @@ const convertJSONFormatToDBFormat = (
         condition = 
           { "if":[{">=": [{ var: conditionObj.field }, conditionObj.value] }] }
         break;
+        case "!=":
+          condition = 
+            { "if":[{"!=": [{ var: conditionObj.field }, conditionObj.value] }] }
+          break;
         case "con":
           condition = 
             { "if": [{ var: conditionObj.field }, true, false] }
-            // [  { "var": " WIST_SCO_SSCO_001"},  true, false ]
           break;
       default:
         condition = null;
