@@ -100,6 +100,8 @@ const RowContainer: React.FC<TableRowProps> = ({
   const [dropDownValueToNull, setDropDownValueToNull] = useState<any>(false);
   const [_selectedValue, _setSelectedValue] = useState<any>(null);
 
+  const [sameOperatorValidation, setSameOperatorValidation] = useState<any>(true);
+
   const handleResetSelection = () => {
     _setSelectedValue(null); // Set the selected value to null
   };
@@ -191,12 +193,26 @@ const RowContainer: React.FC<TableRowProps> = ({
     }
     // Added validation, If the same level expression Changed other child has to be changed
     if (fieldValue?.fieldName === "expression") {
-      console.log("fieldValue Exp", fieldValue);
+      console.log("fieldValue Exp", fieldValue)
+
+
       setDefaultExpression(fieldValue?.input);
       let releatedFields = _nestedRows?.find((x: any[]) => x[sectionLevel])?.[
         sectionLevel
       ]?.fields;
       if (releatedFields) {
+
+        // const selectedQuesList = releatedFields?.map(
+        //   (lvl: any) => lvl?.field
+        // );
+        
+        // const isDuplicateQuesExists = selectedQuesList?.some((value: any, index: any) => selectedQuesList.indexOf(value) !== index)
+        // console.log("isDuplicateQuesExists", isDuplicateQuesExists);
+        // console.log("isDuplicateQuesExists 1", selectedQuesList);
+        // console.log("isDuplicateQuesExists defaultExpression", defaultExpression);
+
+        // if (isDuplicateQuesExists && defaultExpression === "&&") return
+          
         let _collapseList = getAllChildrenIDs(
           findGroupId(
             _nestedRows?.find((x: any[]) => x[sectionLevel])?.[sectionLevel]
@@ -453,14 +469,25 @@ const RowContainer: React.FC<TableRowProps> = ({
       releatedSection?.fields[1]?.expression) {
       setDefaultExpression(releatedSection?.fields[1]?.expression);
     }    
+
+    console.log("JGHGHGUHGUHUUHG", releatedSection?.fields[1]?.expression);
+
     setDropDownQuestionList(() => {
-      return dropDownQuestionList?.map((item: { label: any; }) => {
-        if (questionListInNestedArr?.includes(item?.label)) {
-            return { ...item, status: 'I' };
-        } else {
+      if (releatedSection?.fields[1]?.expression === '&&') {
+        console.log("REMOVEDDD 11111");
+        return dropDownQuestionList?.map((item: { label: any; }) => {
+          if (questionListInNestedArr?.includes(item?.label)) {
+              return { ...item, status: 'I' };
+          } else {
+            return { ...item, status: 'A' };
+          }
+      })
+      } else {
+        console.log("REMOVEDDD 22222");
+        return dropDownQuestionList?.map((item: { label: any; }) => {
           return { ...item, status: 'A' };
-        }
-    })
+      })
+      }
     })
   }, [_nestedRows]);
 
@@ -683,6 +710,25 @@ const RowContainer: React.FC<TableRowProps> = ({
     // }
   }, [listAnsersWithQuestionIds])
 
+  const handleExpValidation = () => {
+    let releatedFields = _nestedRows?.find((x: any[]) => x[sectionLevel])?.[
+      sectionLevel
+    ]?.fields;
+    console.log("LLFFOJIF", releatedFields)
+    if (releatedFields) {
+      const selectedQuesList = releatedFields?.map(
+        (lvl: any) => lvl?.field
+      );
+      
+
+      const isDuplicateQuesExists = selectedQuesList?.some((value: any, index: any) => selectedQuesList.indexOf(value) !== index)
+      console.log("isDuplicateQuesExists", isDuplicateQuesExists);
+      console.log("isDuplicateQuesExists 1", selectedQuesList);
+      console.log("isDuplicateQuesExists defaultExpression", defaultExpression);
+  
+      if (isDuplicateQuesExists && defaultExpression === "&&") return false
+    }
+  }
   const renderNestedConditions = (conditions: any[], marginLeft = 0) => {
     console.log("conditions----->", conditions);
 
@@ -728,7 +774,7 @@ const RowContainer: React.FC<TableRowProps> = ({
                           ? true
                           : false
                       }
-                      setExpression={setFieldValue}
+                      setExpression={(_nestedRows?.find((x: any[]) => x[sectionLevel])?.[sectionLevel]?.fields?.map((lvl: any) => lvl?.field) || []).some((value: any, index: any, array: any[]) => array.indexOf(value) !== index) && defaultExpression === "||" ? null : setFieldValue}
                       changedId={condition?.level}
                       fieldName={"expression"}
                       selectedValue={index === 0 ? '' : conditions[1] && conditions[1]?.expression ? conditions[1]?.expression : condition?.expression}
@@ -740,8 +786,10 @@ const RowContainer: React.FC<TableRowProps> = ({
                     <div className="condition-label">{languageConstants?.ExpressionBuilder_FieldLabel} </div>
                     <FieldInput
                       sampleData={
+                        // dropDownQuestionList && dropDownQuestionList.length && dropDownQuestionList?.filter((x: { status: string; }) => x?.status === "A")
                         dropDownQuestionList && dropDownQuestionList.length && dropDownQuestionList?.filter((x: { status: string; }) => x?.status === "A")
-                      }
+
+                        }
                       selectedValue={condition?.field}
                       overrideSearch={false}
                       setFieldValue={setFieldValue}
