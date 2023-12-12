@@ -1,0 +1,427 @@
+
+.pcf-wrapper {
+  padding: 30px;
+}
+
+.pcf-wrapper .float-right {
+  text-align: right;
+}
+ 
+.validation-wrap .custom-toggle.ant-switch-checked {
+  background-color: #6c7986; /* Set the background color for the checked state */
+}
+
+.validation-wrap .custom-toggle.ant-switch-handle {
+  background-color: #4e4e4f; /* Set the background color for the switch handle */
+}
+
+.control-container {
+  border: none !important;
+}
+
+.validation-wrap .displayText {
+  display: block;
+  text-align: left;
+  margin-bottom: 20px;
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.validation-wrap .tableComponent {
+  border: 1px solid #E6E6E6;
+  padding: 26px 28px;
+}
+
+.validation-wrap .subTitle {
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.validation-wrap .ant-btn {
+  line-height: 15px;
+}
+
+.validation-wrap .text-left {
+  text-align: left;
+}
+
+.validation-wrap .mt-15 {
+  margin-top: 15px;
+}
+
+.validation-wrap .mb-15 {
+  margin-bottom: 15px;
+}
+
+.validation-wrap table {
+  width: 100%;
+}
+
+.validation-wrap .w-100 {
+  width: 100%;
+}
+
+.validation-wrap .actionWrap {
+  width: 33%;
+}
+
+.validation-wrap .checkboxLabel {
+  border: 0.5px solid #C1BDBD;
+  margin-left: 2px;
+  display: inline-block;
+  border-radius: 2px;
+  padding: 4px 8px;
+  text-align: left;
+  width: 100%;
+}
+
+.validation-wrap .actionWrap .ant-checkbox-wrapper {
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+.validation-wrap .visible-box {
+  display: flex;
+}
+
+/* .validation-wrap .ant-select  {
+  width: 100% !important;
+} */
+
+.validation-wrap .checkbox-switch-container {
+  display: flex;
+  align-items: center;
+  margin-left: 10px; 
+}
+
+.validation-wrap .mb-15.flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.validation-wrap .flex-wrap {
+    display: flex;
+    align-items: center;
+}
+
+.validation-wrap .elseText {
+  font-size: 14px;
+  vertical-align: middle;
+  margin-left: 10px;
+  line-height: 22px;
+
+}
+
+.validation-wrap .minmaxText {
+  font-size: 14px;
+  text-align: left;
+  margin-right: 10px;
+}
+
+.validation-wrap th {
+  color: #616161;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.validation-wrap td {
+  padding: 6px 4px;
+  color: #797777;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.validation-wrap .btnAddRow {
+  border: none;
+  font-size: 14px;
+  color: #0958d9;
+  padding: 0;
+}
+
+.validation-wrap .action-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.validation-wrap .nestedBtns {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.validation-wrap .flex-end-wrap {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.validation-wrap .btn-default, .validation-wrap .btn-default:hover {
+  border: 0.5px solid #0958d9 !important;
+  color: #0958d9 !important;
+  height: 30px;
+  min-width: 85px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 2px;
+}
+
+.validation-wrap .mr-20 {
+  margin-right: 20px;
+}
+
+.validation-wrap .mr-30 {
+  margin-right: 30px;
+}
+
+
+.validation-wrap .flex-start {
+  display: flex;
+}
+
+.validation-wrap .w-10 {
+ width: 10%;
+}
+
+.validation-wrap .mr-10 {
+  margin-right: 10px;
+}
+
+.validation-wrap {
+  color: #333333;
+}
+
+.validation-wrap .mt-20 {
+  margin-top: 20px;
+}
+
+.validation-wrap .nested-wrap {
+  border: 1px solid #dee2e6;
+  padding: 10px 15px; 
+  margin-bottom: 20px;
+}
+
+.validation-wrap .condition-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333333;
+  /* width: 200px; */
+  text-align: left;
+}
+.validation-wrap .remove-text {
+  font-size: 14px;
+  color: rgb(51, 51, 51);
+  /* vertical-align: middle; */
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.validation-wrap .condition-label-andor {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333333;
+  width: 100px;
+  text-align: left;
+}
+
+.validation-wrap .survey-list {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333333;
+  width: 100%;
+  text-align: left;
+}
+
+.validation-wrap .validation-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #9b0909;
+  width: 100%;
+  text-align: left;
+}
+
+
+.validation-wrap .loop {
+  position: relative;
+  background: #ffffff;
+  margin-left: 35px;
+  padding: 10px 0px 10px 10px;
+  max-width: 100%;
+  overflow-x: auto;
+  margin-top: 7px;
+}
+
+.validation-wrap .loop:before {
+  border-style: solid;
+  content: "";
+  left: -11px;
+  position: absolute;
+  width: 10px;
+  border-width: 0 0 0 1px;
+  height: 40px;
+  top: -15px;
+  border-color: rgb(153, 187, 255);
+    
+}
+
+.validation-wrap .mb-15 {
+  margin-bottom: 15px;
+}
+
+.validation-wrap .loop:after {
+  height: calc(50% + 4px);
+  top: calc(50% - 50px);
+  border-style: solid;
+  content: "";
+  left: -11px;
+  position: absolute;
+  width: 10px;
+  border-width: 0 0 1px 1px;
+  border-color: rgb(153, 187, 255);
+}
+
+.validation-wrap .flex-row {
+  display: flex;
+  justify-content:space-between;
+  align-items: center;
+}
+
+.validation-wrap .flex-row-start{
+  display: flex;
+  justify-content:flex-start;
+  align-items: center;
+}
+
+.validation-wrap .w-33 {
+  width: 33.49%;
+}
+
+.validation-wrap .action-container {
+  margin-top: 20px;
+}
+
+.validation-wrap .action-container .ant-input-number {
+  width: 50% !important;
+}
+
+.validation-wrap .action-container .ant-checkbox+span {
+  width: 80% !important;
+}
+
+.validation-wrap .flex-col-start {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.validation-wrap .flex-row-start {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: row;
+}
+
+.validation-wrap .validation-text {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.validation-wrap .mb-10 {
+  margin-bottom: 10px;
+}
+
+.validation-wrap .mb-20 {
+  margin-bottom: 20px;
+}
+
+.validation-wrap .ml-20 {
+  margin-left: 20px;
+}
+
+.validation-wrap .survey-list .mb-32 {
+  margin-bottom: 32px;
+}
+
+.validation-wrap .survey-list .pcklbl {
+  padding-right: 10px;
+  margin-top: 7px;
+}
+
+.validation-wrap .collapse-wrap {
+  padding: 10px 10px;
+  margin-bottom: 10px;
+  background-color: #f2f2f2;
+  position: relative;
+}
+
+.validation-wrap .delete-img {
+  height: 17px;
+}
+
+.validation-wrap .text-right {
+  text-align: right;
+}
+
+.validation-wrap .btn-primary {
+  height: 30px;
+  min-width: 85px;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: #0958d9;
+  border: 1px solid #0958d9;
+  color: white !important;
+  line-height: 15px;
+  border-radius: 2px;
+}
+
+.validation-wrap .ant-btn-default:disabled {
+  cursor: not-allowed;
+  border-color: #d9d9d9 !important;
+  color: rgba(0, 0, 0, 0.25) !important;
+  background-color: rgba(0, 0, 0, 0.04);
+  box-shadow: none;
+}
+
+.validation-wrap .anticon-caret-down path,   .validation-wrap .anticon-caret-right path {
+  fill: #0958d9;
+}
+
+.validation-wrap .ant-select-selector {
+  height: 30px;
+  border-radius: 2px;
+}
+
+.validation-wrap .ant-input-number-input {
+  height: 30px;
+  border-radius: 2px;
+}
+
+.validation-wrap .ant-input-number {
+  border-radius: 2px;
+}
+
+.validation-wrap .anticon-caret-down {
+  position: absolute;
+  right: 10px;
+}
+
+.validation-wrap .custom-width {
+  width: 250px;
+}
+
+/* .validation-wrap .ant-select-selector {
+  min-width: 200px;
+} */
+
+.validation-wrap .custom-btn-wrap {
+  display: flex;
+  align-items: center;
+  margin-top: 17px;
+}
+
+.validation-wrap .ant-input {
+  border-radius: 2px;
+}

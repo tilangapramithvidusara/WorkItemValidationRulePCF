@@ -1,0 +1,96 @@
+
+[
+    {
+        "field": "NTemp_C01_s01_grd",
+        "condition": "==",
+        "value": 3,
+        "sort": 1,
+        "level": 1,
+        "hasNested": true,
+        "expression": "and",
+        "collapse": false,
+        "actions": [],
+        "innerConditions": [
+            {
+                "field": "NTemp_C01_s03_q01",
+                "condition": "<",
+                "value": 3,
+                "sort": 1,
+                "level": 11,
+                "hasNested": true,
+                "innerConditions": [],
+                "collapse": false,
+                "expression": "and"
+            },
+            {
+                "field": "NTemp_C01_s01_rd",
+                "condition": "<=",
+                "value": 4,
+                "sort": 1,
+                "level": 12,
+                "hasNested": true,
+                "collapse": false,
+                "expression": "||",
+                "innerConditions": [
+                    {
+                        "field": "NTemp_C01_s01_rd",
+                        "condition": ">",
+                        "value": 3,
+                        "sort": 1,
+                        "level": 121,
+                        "hasNested": true,
+                        "collapse": false,
+                        "expression": "&&",
+                        "innerConditions": [
+                            {
+                                "field": "NTemp_C01_s01_rd",
+                                "condition": ">",
+                                "value": 3,
+                                "sort": 1,
+                                "level": 1211,
+                                "hasNested": true,
+                                "innerConditions": [],
+                                "collapse": false,
+                                "expression": "&&"
+                            },
+                            {
+                                "field": "NTemp_C01_s01_gdRD",
+                                "condition": "<",
+                                "value": 4,
+                                "sort": 1,
+                                "level": 1212,
+                                "hasNested": true,
+                                "collapse": false,
+                                "expression": "&&",
+                                "innerConditions": [
+                                    {
+                                        "field": "NTemp_C01_s01_gdRD",
+                                        "condition": ">",
+                                        "value": 3,
+                                        "sort": 1,
+                                        "level": 12121,
+                                        "hasNested": true,
+                                        "innerConditions": [],
+                                        "collapse": false,
+                                        "expression": "&&"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "field": "NTemp_C2_S1_Q1",
+        "condition": "==",
+        "value": 4,
+        "sort": 1,
+        "level": 2,
+        "hasNested": false,
+        "innerConditions": [],
+        "collapse": false,
+        "expression": "||"
+    }
+]
