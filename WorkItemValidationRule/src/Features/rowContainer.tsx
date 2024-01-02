@@ -80,7 +80,7 @@ const RowContainer: React.FC<TableRowProps> = ({
   imageUrls,
   suerveyIsPublished,
   setQuestionsForRelationship,
-  languageConstants
+  languageConstants,
 }) => {
   const [nestedRows, setNestedRows] = useState<React.ReactNode[]>([]);
   const [collapse, setCollapse] = useState<any>({ state: false, fieldId: 0 });
@@ -93,14 +93,16 @@ const RowContainer: React.FC<TableRowProps> = ({
   const [api, contextHolder]: any = notification.useNotification();
   const [defaultExpression, setDefaultExpression] = useState<any>("");
   const [defaultSection, setDefaultSection] = useState<any>();
-  const [dropDownQuestionList, setDropDownQuestionList]  = useState<any>();
-  const [listAnsersWithQuestionIds, setListAnsersWithQuestionIds] = useState<any>();
-  const [listQuestionIds, setListQuestionIds]  = useState<any>();
-  const [listQuestionLoading, setListQuestionLoading]  = useState<any>(false);
-  const [dropDownValueToNull, setDropDownValueToNull] = useState<any>(false);
+  const [dropDownQuestionList, setDropDownQuestionList] = useState<any>();
+  const [listAnsersWithQuestionIds, setListAnsersWithQuestionIds] =
+    useState<any>();
+  const [listQuestionIds, setListQuestionIds] = useState<any>();
+  const [listQuestionLoading, setListQuestionLoading] = useState<any>(false);
   const [_selectedValue, _setSelectedValue] = useState<any>(null);
+  const [dropdowOperators, setDropdowOperators] = useState<any>(operationalSampleData[0]?.options);
 
-  const [sameOperatorValidation, setSameOperatorValidation] = useState<any>(true);
+  const [sameOperatorValidation, setSameOperatorValidation] =
+    useState<any>(true);
 
   const handleResetSelection = () => {
     _setSelectedValue(null); // Set the selected value to null
@@ -162,9 +164,10 @@ const RowContainer: React.FC<TableRowProps> = ({
               fieldValue?.changedId,
               {
                 fieldName: fieldValue?.fieldName,
-                fieldValue: typeof fieldValue?.input === "string"
-                ? fieldValue?.input.trim()
-                : fieldValue?.input,
+                fieldValue:
+                  typeof fieldValue?.input === "string"
+                    ? fieldValue?.input.trim()
+                    : fieldValue?.input,
                 questionType: fieldValue?.questionType,
               }
             ),
@@ -179,13 +182,6 @@ const RowContainer: React.FC<TableRowProps> = ({
     }
   };
 
-  const openNotificationWithIcon = (type: any, message: any) => {
-    api[type]({
-      message: type,
-      description: message,
-    });
-  };
-
   useEffect(() => {
     console.log("fieldValue", fieldValue);
     if (fieldValue) {
@@ -193,26 +189,13 @@ const RowContainer: React.FC<TableRowProps> = ({
     }
     // Added validation, If the same level expression Changed other child has to be changed
     if (fieldValue?.fieldName === "expression") {
-      console.log("fieldValue Exp", fieldValue)
-
+      console.log("fieldValue Exp", fieldValue);
 
       setDefaultExpression(fieldValue?.input);
       let releatedFields = _nestedRows?.find((x: any[]) => x[sectionLevel])?.[
         sectionLevel
       ]?.fields;
       if (releatedFields) {
-
-        // const selectedQuesList = releatedFields?.map(
-        //   (lvl: any) => lvl?.field
-        // );
-        
-        // const isDuplicateQuesExists = selectedQuesList?.some((value: any, index: any) => selectedQuesList.indexOf(value) !== index)
-        // console.log("isDuplicateQuesExists", isDuplicateQuesExists);
-        // console.log("isDuplicateQuesExists 1", selectedQuesList);
-        // console.log("isDuplicateQuesExists defaultExpression", defaultExpression);
-
-        // if (isDuplicateQuesExists && defaultExpression === "&&") return
-          
         let _collapseList = getAllChildrenIDs(
           findGroupId(
             _nestedRows?.find((x: any[]) => x[sectionLevel])?.[sectionLevel]
@@ -290,7 +273,6 @@ const RowContainer: React.FC<TableRowProps> = ({
 
   useEffect(() => {
     console.log("fieldValue Updating", fieldValue);
-
     if (fieldValue?.fieldName === "field") {
       const resss: any = fetchFieldData(fieldValue?.input);
       handleResetSelection();
@@ -299,28 +281,18 @@ const RowContainer: React.FC<TableRowProps> = ({
       _fieldValue.input = " ";
       _fieldValue.fieldName = "value";
       fieldValueSetToNestedRows(_fieldValue);
-      
+
       let __fieldValue: any = JSON.parse(JSON.stringify(fieldValue));
       __fieldValue.input = " ";
       __fieldValue.fieldName = "condition";
       fieldValueSetToNestedRows(__fieldValue);
-      
     } else if (fieldValue?.fieldName === "condition") {
-      console.log("CONNNNNNNNNN")
+      console.log("CONNNNNNNNNN");
       let _fieldValue: any = fieldValue;
       _fieldValue.input = " ";
       _fieldValue.fieldName = "value";
       fieldValueSetToNestedRows(_fieldValue);
     }
-    // if (fieldValue?.fieldName === "condition") {
-    //   const resss: any = fetchFieldData(fieldValue?.input);
-
-    //   // When the field value get change need to empty value field
-    //   let _fieldValue: any = fieldValue;
-    //   _fieldValue.input = " ";
-    //   _fieldValue.fieldName = "value";
-    //   fieldValueSetToNestedRows(_fieldValue);
-    // }
   }, [fieldValue]);
 
   const addConditionToData = (
@@ -350,17 +322,13 @@ const RowContainer: React.FC<TableRowProps> = ({
     expression: string = ""
   ) => {
     console.log("Clicked Level normal ", level);
-    
+
     let releatedFields = _nestedRows.find((x: any[]) => x[sectionLevel]);
     if (releatedFields) {
       releatedFields = releatedFields[sectionLevel].fields;
       const nearestIdParentObject = getNearestParentByItems(
         releatedFields,
         level
-      );
-      console.log(
-        "Clicked Level normal nearestIdParentObject",
-        nearestIdParentObject
       );
 
       let higestLevel;
@@ -387,14 +355,12 @@ const RowContainer: React.FC<TableRowProps> = ({
       };
 
       const parentIds = releatedFields.map((lvl: { level: any }) => lvl.level);
-      console.log("parent Ids -----> ", parentIds);
       if (parentIds.includes(level)) {
         // _setNestedRows([..._nestedRows, newRow]);
 
         const existingLevel1Index = _nestedRows.findIndex(
           (item: any) => sectionLevel in item
         );
-        console.log("existingLevel1Index", existingLevel1Index);
         if (existingLevel1Index !== -1) {
           const currentFields = _nestedRows.map(
             (prevData: any, index: number) => prevData[sectionLevel]?.actions
@@ -403,12 +369,6 @@ const RowContainer: React.FC<TableRowProps> = ({
           _setNestedRows((prevData: any) => {
             const newData = [...prevData];
             const newFields = [...releatedFields, newRow];
-            console.log("prevData---->", prevData);
-
-            console.log("newData---->", newData);
-
-            console.log("newFields---->", newFields);
-
             newData[existingLevel1Index] = {
               [sectionLevel]: {
                 fields: newFields,
@@ -432,63 +392,75 @@ const RowContainer: React.FC<TableRowProps> = ({
           );
         }
       }
-
-
-      // setDropDownQuestionList((prev: any) => {
-      //   const selectedFields = releatedFields?.map((quesNme: any) => quesNme?.field)
-      //   selectedFields?.forEach((qes: any) => {
-      //     dropDownQuestionList?.find((x: any) => {
-            
-      //     })
-      //     if(qes === prev)
-      //   })
-      // })
-
     }
   };
 
   useEffect(() => {
-    console.log("NESTED", _nestedRows);
-    const releatedSection = _nestedRows
-      ?.find((x: any[]) => x[sectionLevel])
-      ?.[sectionLevel];
-    console.log("releatedSection", releatedSection)
-    setShowActionOutput(releatedSection?.actions?.map((obj: {}) => Object.keys(obj)[0])
+    const releatedSection = _nestedRows?.find((x: any[]) => x[sectionLevel])?.[
+      sectionLevel
+    ];
+    setShowActionOutput(
+      releatedSection?.actions
+        ?.map((obj: {}) => Object.keys(obj)[0])
         .join(" && ")
     );
     if (releatedSection?.fields[0]) {
-      setDefaultSection({ questionName: releatedSection?.fields[0]?.field, sectionId: "" });
+      setDefaultSection({
+        questionName: releatedSection?.fields[0]?.field,
+        sectionId: "",
+      });
     }
-    const questionListInNestedArr = releatedSection?.fields?.map((x: any) => x?.field);
-    console.log("dropDownQuestionList", questionListInNestedArr);
-    console.log("dropDownQuestionList 1", dropDownQuestionList);
+    const questionListInNestedArr = releatedSection?.fields?.map(
+      (x: any) => x?.field
+    );
 
-    if (releatedSection &&
+    if (
+      releatedSection &&
       releatedSection?.fields &&
       releatedSection?.fields[1] &&
-      releatedSection?.fields[1]?.expression) {
+      releatedSection?.fields[1]?.expression
+    ) {
       setDefaultExpression(releatedSection?.fields[1]?.expression);
-    }    
-
-    console.log("JGHGHGUHGUHUUHG", releatedSection?.fields[1]?.expression);
+    }
 
     setDropDownQuestionList(() => {
-      if (releatedSection?.fields[1]?.expression === '&&') {
+      if (releatedSection?.fields[1]?.expression === "&&") {
         console.log("REMOVEDDD 11111");
-        return dropDownQuestionList?.map((item: { label: any; }) => {
+        return dropDownQuestionList?.map((item: { label: any }) => {
           if (questionListInNestedArr?.includes(item?.label)) {
-              return { ...item, status: 'I' };
+            return { ...item, status: "I" };
           } else {
-            return { ...item, status: 'A' };
+            return { ...item, status: "A" };
           }
-      })
+        });
       } else {
         console.log("REMOVEDDD 22222");
-        return dropDownQuestionList?.map((item: { label: any; }) => {
-          return { ...item, status: 'A' };
-      })
+        return dropDownQuestionList?.map((item: { label: any }) => {
+          return { ...item, status: "A" };
+        });
       }
-    })
+    });
+
+    const isContainInclude = _nestedRows
+      ?.find((x: any[]) => x[sectionLevel])
+      ?.[sectionLevel]?.fields?.map((lvl: any) => lvl?.condition);
+    console.log("ISCONTAIN", isContainInclude);
+    console.log("ISCONTAIN _nestedRows", _nestedRows?.find((x: any[]) => x[sectionLevel])?.[sectionLevel]?.fields);
+
+    console.log("ISCONTAIN", isContainInclude?.includes("con"));
+    setDropdowOperators(
+      _nestedRows?.find((x: any[]) => x[sectionLevel])?.[sectionLevel]?.fields
+        ?.length === 1
+        ? operationalSampleData[0]?.options
+        : isContainInclude?.includes("con")
+        ? operationalSampleData[0]?.options?.filter(
+            (item: { value: string }) => item?.value === "con"
+          )
+        : operationalSampleData[0]?.options?.filter(
+            (item: { value: string }) => item?.value !== "con"
+          )
+    );
+
   }, [_nestedRows]);
 
   useEffect(() => {
@@ -639,42 +611,58 @@ const RowContainer: React.FC<TableRowProps> = ({
 
   useEffect(() => {
     if (questionList && questionList.length) {
-      const listQuestions = questionList?.filter((x: any) => x["questionType"] === dbConstants?.questionTypes?.listQuestion)?.map((x: any) => x?.value);
+      const listQuestions = questionList
+        ?.filter(
+          (x: any) =>
+            x["questionType"] === dbConstants?.questionTypes?.listQuestion
+        )
+        ?.map((x: any) => x?.value);
       let releatedFields = _nestedRows?.find((x: any[]) => x[sectionLevel]);
       if (releatedFields) {
-        const fields = releatedFields[sectionLevel]?.fields?.map((x: any) => x?.field);
-        const matchedValues = listQuestions?.filter((value: any) => fields?.includes(value));
+        const fields = releatedFields[sectionLevel]?.fields?.map(
+          (x: any) => x?.field
+        );
+        const matchedValues = listQuestions?.filter((value: any) =>
+          fields?.includes(value)
+        );
         console.log("matchedValues", matchedValues);
         console.log("matchedValues listQuestions", listQuestions);
         console.log("matchedValues fields", fields);
 
-        if (matchedValues && matchedValues?.length) setListQuestionIds(matchedValues);
+        if (matchedValues && matchedValues?.length)
+          setListQuestionIds(matchedValues);
       }
 
-      setDropDownQuestionList(questionList?.filter((quesNme: any) =>
-        quesNme &&
-        // quesNme["questionType"] !== "Grid" &&
-          quesNme["questionType"] !== "Header"
-    ))}
-  }, [questionList])
-
+      setDropDownQuestionList(
+        questionList?.filter(
+          (quesNme: any) =>
+            quesNme &&
+            // quesNme["questionType"] !== "Grid" &&
+            quesNme["questionType"] !== "Header"
+        )
+      );
+    }
+  }, [questionList]);
 
   const fetchQuestionDetails = async (questionIds: any) => {
     const questionListArray: any = [];
-  
+
     await Promise.all(
       questionIds?.map(async (questionId: any) => {
         const questionDetails = questionList?.find(
           (x: any) => x.value === questionId
         );
-  
-        if (questionDetails?.questionType === dbConstants.questionTypes.listQuestion) {
+
+        if (
+          questionDetails?.questionType ===
+          dbConstants.questionTypes.listQuestion
+        ) {
           setIsLoad(true);
-  
+
           const response = await getListAnswersByQuestionId(
             questionDetails?.questionId
           );
-  
+
           let dropDownData = [];
           if (response?.data?.entities) {
             dropDownData = response?.data.entities.map((x: any) => ({
@@ -687,48 +675,21 @@ const RowContainer: React.FC<TableRowProps> = ({
         }
       })
     );
-  
+
     if (questionListArray && questionListArray?.length) {
       setListAnsersWithQuestionIds(questionListArray);
-      
     }
     setListQuestionLoading(false);
   };
 
   useEffect(() => {
-    console.log("setListQuestionIds", listQuestionIds)
+    console.log("setListQuestionIds", listQuestionIds);
     if (listQuestionIds && listQuestionIds?.length) {
       setListQuestionLoading(true);
       fetchQuestionDetails(listQuestionIds);
     }
   }, [listQuestionIds]);
 
-  useEffect(() => {
-    console.log("listAnsersWithQuestionIds", listAnsersWithQuestionIds);
-    // if (listAnsersWithQuestionIds) {
-    //   setAnswersDropDownData(dropDownData);
-    // }
-  }, [listAnsersWithQuestionIds])
-
-  const handleExpValidation = () => {
-    let releatedFields = _nestedRows?.find((x: any[]) => x[sectionLevel])?.[
-      sectionLevel
-    ]?.fields;
-    console.log("LLFFOJIF", releatedFields)
-    if (releatedFields) {
-      const selectedQuesList = releatedFields?.map(
-        (lvl: any) => lvl?.field
-      );
-      
-
-      const isDuplicateQuesExists = selectedQuesList?.some((value: any, index: any) => selectedQuesList.indexOf(value) !== index)
-      console.log("isDuplicateQuesExists", isDuplicateQuesExists);
-      console.log("isDuplicateQuesExists 1", selectedQuesList);
-      console.log("isDuplicateQuesExists defaultExpression", defaultExpression);
-  
-      if (isDuplicateQuesExists && defaultExpression === "&&") return false
-    }
-  }
   const renderNestedConditions = (conditions: any[], marginLeft = 0) => {
     console.log("conditions----->", conditions);
 
@@ -753,8 +714,6 @@ const RowContainer: React.FC<TableRowProps> = ({
                   )}
                   <div className="validation-text"></div>
                 </div>
-               
-                
               </div>
               <div className="loop">
                 <div
@@ -764,7 +723,9 @@ const RowContainer: React.FC<TableRowProps> = ({
                   }}
                 >
                   <div className="mr-20">
-                    <div className="condition-label-andor">{languageConstants?.ExpressionBuilder_AndorLabel}</div>
+                    <div className="condition-label-andor">
+                      {languageConstants?.ExpressionBuilder_AndorLabel}
+                    </div>
                     <DropDown
                       dropDownData={expressionSampleData}
                       isDisabled={
@@ -774,46 +735,76 @@ const RowContainer: React.FC<TableRowProps> = ({
                           ? true
                           : false
                       }
-                      setExpression={(_nestedRows?.find((x: any[]) => x[sectionLevel])?.[sectionLevel]?.fields?.map((lvl: any) => lvl?.field) || []).some((value: any, index: any, array: any[]) => array.indexOf(value) !== index) && defaultExpression === "||" ? null : setFieldValue}
+                      setExpression={
+                        (
+                          _nestedRows
+                            ?.find((x: any[]) => x[sectionLevel])
+                            ?.[sectionLevel]?.fields?.map(
+                              (lvl: any) => lvl?.field
+                            ) || []
+                        ).some(
+                          (value: any, index: any, array: any[]) =>
+                            array.indexOf(value) !== index
+                        ) && defaultExpression === "||"
+                          ? null
+                          : setFieldValue
+                      }
                       changedId={condition?.level}
                       fieldName={"expression"}
-                      selectedValue={index === 0 ? '' : conditions[1] && conditions[1]?.expression ? conditions[1]?.expression : condition?.expression}
+                      selectedValue={
+                        index === 0
+                          ? ""
+                          : conditions[1] && conditions[1]?.expression
+                          ? conditions[1]?.expression
+                          : condition?.expression
+                      }
                     />{" "}
                   </div>
 
-                  {
-                    !isLoad ? <div className="mr-20">
-                    <div className="condition-label">{languageConstants?.ExpressionBuilder_FieldLabel} </div>
-                    <FieldInput
-                      sampleData={
-                        // dropDownQuestionList && dropDownQuestionList.length && dropDownQuestionList?.filter((x: { status: string; }) => x?.status === "A")
-                        dropDownQuestionList && dropDownQuestionList.length && dropDownQuestionList?.filter((x: { status: string; }) => x?.status === "A")
-
-                        }
-                      selectedValue={condition?.field}
-                      overrideSearch={false}
-                      setFieldValue={setFieldValue}
-                      changedId={condition?.level}
-                      fieldName={"field"}
-                      isDisabled={suerveyIsPublished}
-                    />{" "}
-                    </div> :
-                      <div className="mr-20">
-                        <div className="condition-label">{languageConstants?.ExpressionBuilder_FieldLabel} </div>
-                          <Space size="middle">
-                            <Spin />
-                          </Space>
+                  {!isLoad ? (
+                    <div className="mr-20">
+                      <div className="condition-label">
+                        {languageConstants?.ExpressionBuilder_FieldLabel}{" "}
                       </div>
-                  }
+                      <FieldInput
+                        sampleData={
+                          // dropDownQuestionList && dropDownQuestionList.length && dropDownQuestionList?.filter((x: { status: string; }) => x?.status === "A")
+                          dropDownQuestionList &&
+                          dropDownQuestionList.length &&
+                          dropDownQuestionList?.filter(
+                            (x: { status: string }) => x?.status === "A"
+                          )
+                        }
+                        selectedValue={condition?.field}
+                        overrideSearch={false}
+                        setFieldValue={setFieldValue}
+                        changedId={condition?.level}
+                        fieldName={"field"}
+                        isDisabled={suerveyIsPublished}
+                      />{" "}
+                    </div>
+                  ) : (
+                    <div className="mr-20">
+                      <div className="condition-label">
+                        {languageConstants?.ExpressionBuilder_FieldLabel}{" "}
+                      </div>
+                      <Space size="middle">
+                        <Spin />
+                      </Space>
+                    </div>
+                  )}
                   <div className="mr-20">
-                    <div className="condition-label">{languageConstants?.ExpressionBuilder_OperatorLabel}</div>
+                    <div className="condition-label">
+                      {languageConstants?.ExpressionBuilder_OperatorLabel}
+                    </div>
                     {dropDownQuestionList?.find(
                       (x: { value: string }) => x?.value === condition?.field
                     )?.questionType ===
                     dbConstants.questionTypes.numericQuestion ? (
                       <DropDown
-                        dropDownData={operationalSampleData[0]?.options?.filter(
-                          (item: { value: string }) => item?.value !== "!="
+                        dropDownData={dropdowOperators?.filter(
+                          (item: { value: string }) =>
+                            item?.value === "!=" 
                         )}
                         isDisabled={
                           suerveyIsPublished ? suerveyIsPublished : false
@@ -828,7 +819,7 @@ const RowContainer: React.FC<TableRowProps> = ({
                       )?.questionType ===
                       dbConstants.questionTypes.listQuestion ? (
                       <DropDown
-                        dropDownData={operationalSampleData[0]?.options?.filter(
+                        dropDownData={dropdowOperators?.filter(
                           (item: { value: string }) =>
                             item?.value === "==" ||
                             item?.value === "!=" ||
@@ -846,12 +837,12 @@ const RowContainer: React.FC<TableRowProps> = ({
                         (x: { value: string }) => x?.value === condition?.field
                       )?.questionType ===
                         dbConstants.questionTypes.stringQuestion ||
-                        dropDownQuestionList?.find(
+                      dropDownQuestionList?.find(
                         (x: { value: string }) => x?.value === condition?.field
                       )?.questionType ===
                         dbConstants.questionTypes.gridQuestion ? (
                       <DropDown
-                        dropDownData={operationalSampleData[0]?.options?.filter(
+                        dropDownData={dropdowOperators?.filter(
                           (item: { value: string }) =>
                             // item?.value === "==" ||
                             // item?.value === "!=" ||
@@ -867,7 +858,7 @@ const RowContainer: React.FC<TableRowProps> = ({
                       />
                     ) : (
                       <DropDown
-                        dropDownData={operationalSampleData}
+                        dropDownData={dropdowOperators}
                         isDisabled={
                           suerveyIsPublished ? suerveyIsPublished : false
                         }
@@ -879,142 +870,157 @@ const RowContainer: React.FC<TableRowProps> = ({
                     )}
                   </div>
                   <div className="mr-20">
-                    <div className="condition-label">{languageConstants?.ExpressionBuilder_ValueLabel} </div>
-                    {
-                      condition?.condition === 'con' ?
-                        <FieldStringInputProps
-                      sampleData={
-                        dropDownQuestionList && dropDownQuestionList.length && dropDownQuestionList
-                      }
-                      selectedValue={null}
-                      overrideSearch={false}
-                      setFieldValue={setFieldValue}
-                      changedId={condition?.level}
-                      fieldName={"value"}
-                      isDisabled={true}
-                    /> :
-                    dropDownQuestionList?.find(
-                          (x: { value: string }) => x?.value === condition?.field
-                        )?.questionType ===
-                        dbConstants.questionTypes.numericQuestion ? (
-                          <NumberInputField
-                            selectedValue={condition?.value}
-                            handleNumberChange={{}}
-                            defaultDisabled={
-                              suerveyIsPublished ? suerveyIsPublished : false
-                            }
-                            setInputNumber={setFieldValue}
-                            changedId={condition?.level}
-                            fieldName={"value"}
-                            validatingSuccess={true}
-                          />
-                        ) : dropDownQuestionList?.find(
-                            (x: { value: string }) => x?.value === condition?.field
-                          )?.questionType ===
-                          dbConstants.questionTypes.stringQuestion ? (
-                          <FieldStringInputProps
-                            sampleData={
-                              dropDownQuestionList && dropDownQuestionList.length && dropDownQuestionList
-                            }
-                            selectedValue={condition?.value}
-                            overrideSearch={false}
-                            setFieldValue={setFieldValue}
-                            changedId={condition?.level}
-                            fieldName={"value"}
-                            isDisabled={suerveyIsPublished}
-                          />
-                        ) : dropDownQuestionList?.find(
-                            (x: { value: string }) => x?.value === condition?.field
-                          )?.questionType ===
-                          dbConstants.questionTypes.dateTimeQuestion ? (
-                          <DatePickerCustom
-                            isDisabled={
-                              suerveyIsPublished ? suerveyIsPublished : false
-                            }
-                            setFieldValue={setFieldValue}
-                            changedId={condition?.level}
-                            fieldName={"value"}
-                            selectedValue={
-                              condition?.value ? condition?.value : moment()
-                            }
-                          />
-                        ) : dropDownQuestionList?.find(
-                            (x: { value: string }) => x?.value === condition?.field
-                          )?.questionType ===
-                          dbConstants.questionTypes.listQuestion ? (
-                          <ListDropDown
-                                    dropDownData={{}}
-                                    isDisabled={suerveyIsPublished ? suerveyIsPublished : false}
-                                    setFieldValue={setFieldValue}
-                                    changedId={condition?.level}
-                                    fieldName={"value"}
-                                    selectedValue={condition?.value}
-                                    listDropDownData={answersDropDownData.concat(listAnsersWithQuestionIds?.find((x: any) => x?.questionId === condition?.field)?.listAnswers)?.filter(x => x)}
-                                  />
-                        ) : dropDownQuestionList?.find(
-                          (x: { value: string }) => x?.value === condition?.field
-                        )?.questionType === dbConstants.questionTypes.dateTimeQuestion ? (
-                          <DatePickerCustom
-                            isDisabled={suerveyIsPublished ? suerveyIsPublished : false}
-                            setFieldValue={setFieldValue}
-                            changedId={condition?.level}
-                            fieldName={"value"}
-                            selectedValue={condition?.value ? condition?.value : ""}
-                      
-                          />
-                        ) : (
-                          <FieldStringInputProps
-                            sampleData={
-                              dropDownQuestionList && dropDownQuestionList.length && dropDownQuestionList
-                            }
-                            selectedValue={condition?.value}
-                            overrideSearch={false}
-                            setFieldValue={setFieldValue}
-                            changedId={condition?.level}
-                            fieldName={"value"}
-                            isDisabled={suerveyIsPublished}
-                          />
-                        )}
+                    <div className="condition-label">
+                      {languageConstants?.ExpressionBuilder_ValueLabel}{" "}
+                    </div>
+                    {condition?.condition === "con" ? (
+                      <FieldStringInputProps
+                        sampleData={
+                          dropDownQuestionList &&
+                          dropDownQuestionList.length &&
+                          dropDownQuestionList
+                        }
+                        selectedValue={null}
+                        overrideSearch={false}
+                        setFieldValue={setFieldValue}
+                        changedId={condition?.level}
+                        fieldName={"value"}
+                        isDisabled={true}
+                      />
+                    ) : dropDownQuestionList?.find(
+                        (x: { value: string }) => x?.value === condition?.field
+                      )?.questionType ===
+                      dbConstants.questionTypes.numericQuestion ? (
+                      <NumberInputField
+                        selectedValue={condition?.value}
+                        handleNumberChange={{}}
+                        defaultDisabled={
+                          suerveyIsPublished ? suerveyIsPublished : false
+                        }
+                        setInputNumber={setFieldValue}
+                        changedId={condition?.level}
+                        fieldName={"value"}
+                        validatingSuccess={true}
+                      />
+                    ) : dropDownQuestionList?.find(
+                        (x: { value: string }) => x?.value === condition?.field
+                      )?.questionType ===
+                      dbConstants.questionTypes.stringQuestion ? (
+                      <FieldStringInputProps
+                        sampleData={
+                          dropDownQuestionList &&
+                          dropDownQuestionList.length &&
+                          dropDownQuestionList
+                        }
+                        selectedValue={condition?.value}
+                        overrideSearch={false}
+                        setFieldValue={setFieldValue}
+                        changedId={condition?.level}
+                        fieldName={"value"}
+                        isDisabled={suerveyIsPublished}
+                      />
+                    ) : dropDownQuestionList?.find(
+                        (x: { value: string }) => x?.value === condition?.field
+                      )?.questionType ===
+                      dbConstants.questionTypes.dateTimeQuestion ? (
+                      <DatePickerCustom
+                        isDisabled={
+                          suerveyIsPublished ? suerveyIsPublished : false
+                        }
+                        setFieldValue={setFieldValue}
+                        changedId={condition?.level}
+                        fieldName={"value"}
+                        selectedValue={
+                          condition?.value ? condition?.value : moment()
+                        }
+                      />
+                    ) : dropDownQuestionList?.find(
+                        (x: { value: string }) => x?.value === condition?.field
+                      )?.questionType ===
+                      dbConstants.questionTypes.listQuestion ? (
+                      <ListDropDown
+                        dropDownData={{}}
+                        isDisabled={
+                          suerveyIsPublished ? suerveyIsPublished : false
+                        }
+                        setFieldValue={setFieldValue}
+                        changedId={condition?.level}
+                        fieldName={"value"}
+                        selectedValue={condition?.value}
+                        listDropDownData={answersDropDownData
+                          .concat(
+                            listAnsersWithQuestionIds?.find(
+                              (x: any) => x?.questionId === condition?.field
+                            )?.listAnswers
+                          )
+                          ?.filter((x) => x)}
+                      />
+                    ) : dropDownQuestionList?.find(
+                        (x: { value: string }) => x?.value === condition?.field
+                      )?.questionType ===
+                      dbConstants.questionTypes.dateTimeQuestion ? (
+                      <DatePickerCustom
+                        isDisabled={
+                          suerveyIsPublished ? suerveyIsPublished : false
+                        }
+                        setFieldValue={setFieldValue}
+                        changedId={condition?.level}
+                        fieldName={"value"}
+                        selectedValue={condition?.value ? condition?.value : ""}
+                      />
+                    ) : (
+                      <FieldStringInputProps
+                        sampleData={
+                          dropDownQuestionList &&
+                          dropDownQuestionList.length &&
+                          dropDownQuestionList
+                        }
+                        selectedValue={condition?.value}
+                        overrideSearch={false}
+                        setFieldValue={setFieldValue}
+                        changedId={condition?.level}
+                        fieldName={"value"}
+                        isDisabled={suerveyIsPublished}
+                      />
+                    )}
                   </div>
                   <div className="custom-btn-wrap">
-                      {
-                        (suerveyIsPublished || condition?.level === 1) ?
-                          <></>
-                          :
-                          <div className="flex-wrap">  
-                            <img 
-                            src={imageUrls?.imageUrl} alt="icon"
-                            // onClick={() => _handleDeleteRow(condition?.level)}
-                            height={'15px'}
-                            onClick={() => _handleDeleteRow(condition?.level)}
-                            />
-                            <span className="remove-text">{languageConstants?.ExpressionBuilder_RemoveButton} </span>
-                          </div>
-                         
-                      }
+                    {suerveyIsPublished || condition?.level === 1 ? (
+                      <></>
+                    ) : (
+                      <div className="flex-wrap">
+                        <img
+                          src={imageUrls?.imageUrl}
+                          alt="icon"
+                          // onClick={() => _handleDeleteRow(condition?.level)}
+                          height={"15px"}
+                          onClick={() => _handleDeleteRow(condition?.level)}
+                        />
+                        <span className="remove-text">
+                          {languageConstants?.ExpressionBuilder_RemoveButton}{" "}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  
                 </div>
               </div>
-              {
-                  lastIndex === index ?
-                    <div className="flex-row-start mb-15 mt-15">
-                      <Button
-                        className="mr-10 btn-default"
-                        onClick={() =>
-                          _handleAddRow(condition?.level, false, "AND")
-                        }
-                        disabled={suerveyIsPublished}
-                      >
-                      {/* + Add */}
-                      {/* {languageConstants?.addButton}  */}
-                      {`+ ${languageConstants?.ExpressionBuilder_AddButton}`}
-                      </Button>
-                    </div> :
-                    <div>
-
-                    </div>
-                }
+              {lastIndex === index ? (
+                <div className="flex-row-start mb-15 mt-15">
+                  <Button
+                    className="mr-10 btn-default"
+                    onClick={() =>
+                      _handleAddRow(condition?.level, false, "AND")
+                    }
+                    disabled={suerveyIsPublished}
+                  >
+                    {/* + Add */}
+                    {/* {languageConstants?.addButton}  */}
+                    {`+ ${languageConstants?.ExpressionBuilder_AddButton}`}
+                  </Button>
+                </div>
+              ) : (
+                <div></div>
+              )}
             </div>
           ) : (
             <div className="flex-row-start mb-10 collapse-wrap custom-width">
@@ -1051,9 +1057,11 @@ const RowContainer: React.FC<TableRowProps> = ({
             </div>
           )}
           <div style={{ paddingLeft: "30px" }}>
-          {
-                !listQuestionLoading && renderNestedConditions(condition?.innerConditions, marginLeft + 5)
-          }
+            {!listQuestionLoading &&
+              renderNestedConditions(
+                condition?.innerConditions,
+                marginLeft + 5
+              )}
             {/* {renderNestedConditions(condition?.innerConditions, marginLeft + 5)} */}
           </div>
         </div>
@@ -1067,47 +1075,45 @@ const RowContainer: React.FC<TableRowProps> = ({
     <div>
       {contextHolder}
       {/* {!isLoad ? ( */}
-        <div>
-          <div style={{ textAlign: "left" }}>
-            {" "}
-            {_nestedRows &&
-              _nestedRows?.length &&
-              "if(" +
-                generateOutputString(
-                  _nestedRows?.find((x: any[]) => x[sectionLevel])?.[
-                    sectionLevel
-                  ]?.fields || []
-                ) +
-                ")"}{" "}
-          </div>
-          <div style={{ textAlign: "right", marginBottom: "10px" }}>
-            {" "}
-           { suerveyIsPublished ?
-                <img
-                  src={imageUrls?.imageUrl} alt="icon"
-                  height={'15px'}
-                >
-                  </img> :
-            <div>
-                    <img
-                        src={imageUrls?.imageUrl} alt="icon"
-                height={'15px'}
-                onClick={() => handleSectionRemove(sectionLevel)} 
-                      // onClick={() => handleSectionRemove(sectionLevel)}
-                        /> 
-                <span className="remove-text">{languageConstants?.ExpressionBuilder_RemoveWIButton}</span>
-                
-                  </div>
-                }
-          </div>
-
+      <div>
+        <div style={{ textAlign: "left" }}>
+          {" "}
           {_nestedRows &&
             _nestedRows?.length &&
-            renderNestedConditions(
-              _nestedRows?.find((x: any[]) => x[sectionLevel])?.[sectionLevel]
-                ?.fields || []
-            )}
+            "if(" +
+              generateOutputString(
+                _nestedRows?.find((x: any[]) => x[sectionLevel])?.[sectionLevel]
+                  ?.fields || []
+              ) +
+              ")"}{" "}
         </div>
+        <div style={{ textAlign: "right", marginBottom: "10px" }}>
+          {" "}
+          {suerveyIsPublished ? (
+            <img src={imageUrls?.imageUrl} alt="icon" height={"15px"}></img>
+          ) : (
+            <div>
+              <img
+                src={imageUrls?.imageUrl}
+                alt="icon"
+                height={"15px"}
+                onClick={() => handleSectionRemove(sectionLevel)}
+                // onClick={() => handleSectionRemove(sectionLevel)}
+              />
+              <span className="remove-text">
+                {languageConstants?.ExpressionBuilder_RemoveWIButton}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {_nestedRows &&
+          _nestedRows?.length &&
+          renderNestedConditions(
+            _nestedRows?.find((x: any[]) => x[sectionLevel])?.[sectionLevel]
+              ?.fields || []
+          )}
+      </div>
       {/* ) : (
         <div>
           <Space size="middle">

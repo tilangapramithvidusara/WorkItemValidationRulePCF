@@ -37,10 +37,6 @@ function PickServeyContainer({
   // Filter `option.label` match the user type `input`
   const filterOption : any = (input: string, option: { label: string; value: string }) =>
     (option?.label ?? '').toLowerCase().includes(input.toLowerCase());
-
-  useEffect(() => {
-    console.log("SURRRRRR", surveyList);
-  }, [surveyList]);
   
   handleSectionRemove = (deleteSectionKey: any) => {
     console.log("Section remove hitted", deleteSectionKey)

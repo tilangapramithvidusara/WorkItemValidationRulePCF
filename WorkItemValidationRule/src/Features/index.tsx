@@ -67,16 +67,13 @@ const ParentComponent = ({
   const [questionsForRelationship, setQuestionsForRelationship] = useState<any[]>([]);
   const [surveyList, setSurveyList] = useState<any[]>([]);
   const [selectedSurvey, setSelectedSurvey] = useState<any>();
-  const [localTest, setLocalTest] = useState<any>(false);
+  const [localTest, setLocalTest] = useState<any>(true);
   const [relationships, setRelationships] = useState<any[]>([]);
   const [initialLoadWithNoSurvey, setInitialLoadWithNoSurvey] = useState<any>(false);
   const [disableSaveButton, setDisableSaveButton] = useState<any>(false);
   const [languageConstants, setLanguageConstants] = useState<any>(
     languageConstantsForCountry.en
   );
-  const [selectedLanguage, setSelectedLanguage] = useState<any>('en');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [deleteSectionKey, setDeleteSectionKey] = useState<any>();
   const [validation, setValidation] = useState<any>({
     minMaxValidation: true,
     andOrValidation: true,
@@ -141,14 +138,6 @@ const ParentComponent = ({
   };
 
   useEffect(() => {
-    console.log("SECCCC", sections);
-  }, [sections]);
-
-  useEffect(() => {
-    console.log("questionList", questionList);
-  }, [questionList]);
-
-  useEffect(() => {
     setSections(
       _nestedRows
         ?.map((item: {}) => Object.keys(item))
@@ -158,7 +147,6 @@ const ParentComponent = ({
     );
     if (_nestedRows?.length === 0 || !_nestedRows?.length)
       setIsApiDataLoaded(false);
-    
     console.log("_nestedRows", _nestedRows)
   }, [_nestedRows]);
 
@@ -187,10 +175,6 @@ const ParentComponent = ({
     }
   }
   
-
-  useEffect(() => {
-    console.log("languageConstants", languageConstants)
-  }, [languageConstants])
   // for retrieve purpose
   useEffect(() => {
     setSections(
@@ -341,50 +325,7 @@ const ParentComponent = ({
           { visibility: _visibilityRulePreviousValues },
         ]);
       }
-    
     }
-
-    //test
-    // _setVisibilityRulePrev((prevValue) => [
-    //   ...prevValue,
-    //   {
-    //     visibility:
-    //     {"or" : [
-    //       {"and" : [
-    //         {"==": [{ var: "FSCM_PL_INV_001"}, "Y"]},
-    //         {"==": [{ var: "FSCM_PL_INV_007"}, "Two"]},
-    //         {"==": [{ var: "FSCM_PL_INV_010"}, "AMT"]},
-    //       ]},
-    //       {"and" : [
-    //         {"==": [{ var: "FSCM_PL_INV_001"}, "Y"]},
-    //         {"==": [{ var: "FSCM_PL_INV_007"}, "Three"]},
-    //         {"==": [{ var: "FSCM_PL_INV_010"}, "AMT"]},
-    //       ]},
-    //       {"and" : [
-    //         {"==": [{ var: "FSCM_PL_INV_001"}, "Y"]},
-    //         {"==": [{ var: "FSCM_PL_INV_007"}, "Two"]},
-    //         {"==": [{ var: "FSCM_PL_INV_010"}, "AP"]},
-    //       ]},
-    //       {"and" : [
-    //         {"==": [{ var: "FSCM_PL_INV_001"}, "Y"]},
-    //         {"==": [{ var: "FSCM_PL_INV_007"}, "Three"]},
-    //         { "==": [{ var: "FSCM_PL_INV_010" }, "AP"] },
-    //         {
-    //           "or": [{"==": [{ var: "FSCM_PL_INV_001"}, "Y"]}]
-    //         }
-    //       ]
-          
-    //       }
-    //       ]}
-    //   }
-    // ])
-
-    //   _setVisibilityRulePrev((prevValue) => [
-    //   ...prevValue,
-    //   {
-    //     visibility: { "if": [ { "==": [ { "var": "NTemp_C01_s01_grd" }, 1222 ] } ] }
-    //   }
-    // ]) 
   };
   const getCurrentPublishedStatus = async () => {
     const { data = null } = await getPublishedStatus(currentPossitionDetails);
@@ -416,8 +357,6 @@ const ParentComponent = ({
     const { data = [] } = await getWorkItemRelationshipByWorkitemId(currentPossitionDetails?.id);
     console.log("RelationShipsss", data);
     if (!data?.error) {
-      // const relationShipUsedInCreationRule = data?.filter((relShips: any) => relShips?.gyde_isusedincreationrule)
-      // console.log("relationShipUsedInCreationRule", relationShipUsedInCreationRule)
       setRelationships(data);
     }
   }
@@ -433,19 +372,9 @@ const ParentComponent = ({
     }
   }, [currentPossitionDetails]);
 
-  // useEffect(() => {
-  //   console.log("selectedSurvey", selectedSurvey);
-  //   if(selectedSurvey) loadQuestionHandler(selectedSurvey);
-  // }, [selectedSurvey]);
-
   const handleSectionRemove = (deleteSectionKey: any) => {
-    console.log("Section remove hitted", deleteSectionKey)
-    // setDeleteSectionKey(deleteSectionKey)
     if (deleteSectionKey) {
       _setNestedRows((prevNestedRows: any) => {
-        // if (prevNestedRows && prevNestedRows.length === 1) {
-        //   saveVisibilityData({});
-        // }
         return prevNestedRows.filter(
           (key: any) => parseInt(Object.keys(key)[0]) !== deleteSectionKey
         )
@@ -461,22 +390,12 @@ const ParentComponent = ({
     console.log("Current State Details ----> ", result);
     if (result?.data) setCurrentPossitionDetails(result?.data);
   };
-
-  useEffect(() => {
-    console.log("relationships sets", relationships)
-  }, [relationships]);
   
   const saveVisibilityData = async (
     visibilityRule: any,
   ) => {
     let logicalName = dbConstants.question.fieldName
-    
-    console.log("logicalName when saving", logicalName);
-    console.log(
-      "logicalName when saving currentPossitionDetails",
-      currentPossitionDetails
-    );
-
+  
     const result = await saveRequest(logicalName, currentPossitionDetails?.id, {
       [dbConstants.common.gyde_visibilityrule]:
         // JSON.stringify(visibilityRule),
@@ -505,8 +424,6 @@ const ParentComponent = ({
 
     console.log("existanceRelationshipIds", existanceRelationshipIds)
     for (const sec of _nestedRows) {
-      console.log("SECCCCCCCC", sec);
-
       const key = Object.keys(sec)[0];
       _prepareForRelationship = JSON.parse(JSON.stringify(sec[key].fields));
     
@@ -531,8 +448,6 @@ const ParentComponent = ({
             }));
           }
     
-          console.log("Relationship List Answers", listAnswers);
-
           if (listAnswers[0]?.value) {
             if (relField?.condition !== 'con') {
               answerObject = {
@@ -597,66 +512,9 @@ const ParentComponent = ({
       await reloadPage();
       setDisableSaveButton(false);
     }, 3000); // 2000 milliseconds = 2 seconds
-    
-    // _nestedRows.forEach((sec: any) => {
-    //   console.log("SECCCCCCCC", sec);
-    //   const key = Object.keys(sec)[0];
-    //   _prepareForRelationship = JSON.parse(JSON.stringify(sec[key].fields));
-    //   _prepareForRelationship?.forEach(async (relField: any) => {
-    //     let selectedValue: any = questionList.find((x: { value: any; }) => x?.value === relField?.field);
-    //     if (selectedValue?.questionType === "List") {
-    //       // selectedValue.options = relField?.value || "";
 
-    //       const response = await getListAnswersByQuestionId(
-    //         selectedValue?.questionId
-    //       );
-  
-    //       let listAnswers = [];
-    //       if (response?.data?.entities) {
-    //         listAnswers = response?.data.entities.map((x: any) => ({
-    //           value: x.gyde_answervalue,
-    //         }));
-    //         // questionListArray.push({ questionId, listAnswers: dropDownData });
-    //         // setIsLoad(false);
-    //       }
-    //       console.log("Relationship List Answers", listAnswers);
-    //       const newObject = {
-    //         "label": selectedValue?.label,
-    //         "value": listAnswers[0]?.value,
-    //         "questionType": selectedValue?.questionType,
-    //         "questionId": selectedValue?.questionId,
-    //         "sectionId": selectedValue?.sectionId,
-    //         "status": selectedValue?.status,
-    //         "internalId": selectedValue?.internalId,
-    //         "options": relField?.value
-    //       };
-    //       relationshipCreationArray.push(newObject);
-    //     }
-    //     console.log("selectedValueselectedValue", selectedValue);
-    //     // console.log("existanceRelationshipIds", existanceRelationshipIds);
-
-    //     if (Object.keys(selectedValue)?.length !== 0) {
-    //       relationshipCreationArray.push(selectedValue)
-    //     }
-    //   });
-    //   console.log("relationshipCreationArray", relationshipCreationArray);
-
-    // });
-    // // relationshipDataset = relationshipDataset?.filter((x: any) => {
-    // //   relationships?.
-    // // })
-    // if (relationshipCreationArray && relationshipCreationArray?.length) await createRelationshipForWI(currentPossitionDetails?.id, relationshipCreationArray);
-    
-    // await _getWorkItemRelationshipByWorkitemId();
-    // await reloadPage();
-    // setDisableSaveButton(false);
   }
 
-  const languageChangeHandler = (e: any) => {
-    console.log("EEEEcdsefef", e)
-    setSelectedLanguage(e?.target?.value);
-    setLanguageConstants(languageConstantsForCountry[e?.target?.value]);
-  }
 
 
   const handleSaveLogic = async () => {
@@ -755,16 +613,10 @@ const ParentComponent = ({
     setDisableSaveButton(false);
   };
 
-  useEffect(() => {
-    console.log("questionsForRelationship", questionsForRelationship)
-  }, [questionsForRelationship])
-
   const _getQuestionInfoByQuestionName = async (questionName: any) => {
     const questionDetails: any = await getQuestionInfoByQuestionName(questionName);
-    console.log("questionDetails", questionDetails);
     if (questionDetails?.data) {
       const survey = surveyList?.find(x => x?.gyde_name === questionDetails?.data["_gyde_surveytemplate_value@OData.Community.Display.V1.FormattedValue"]);
-      console.log("DGDDDSSSS", survey);
       if(survey?.gyde_surveytemplateid) setSelectedSurvey(survey?.gyde_surveytemplateid)
       if (!survey) setInitialLoadWithNoSurvey(true)
       else setInitialLoadWithNoSurvey(false);
@@ -775,10 +627,8 @@ const ParentComponent = ({
   useEffect(() => {
     if (surveyList?.length > 0 && _nestedRows?.length > 0) {
       _nestedRows?.forEach((sec: any) => {
-        console.log("SECCCCCCCC", sec);
         const key = Object.keys(sec)[0];
         let prepareForValidation = JSON.parse(JSON.stringify(sec[key]?.fields));
-        console.log("prepareForValidation", prepareForValidation);
         _getQuestionInfoByQuestionName(prepareForValidation[0]?.field);
       })
     }
@@ -790,22 +640,6 @@ const ParentComponent = ({
       loadQuestionHandler(selectedSurvey);
     }
   }, [selectedSurvey]);
-
-  useEffect(() => {
-    console.log("languageConstantsppppp", languageConstants)
-  }, [languageConstants])
-
-  const resetWorkItemExpression = () => {
-    setIsModalOpen(true);
-  }
-  function handleOk(e: any) {
-    console.log("HAND:E CONFIRM")
-  }
-
-  function handleCancel(e: any) {
-    console.log("HAND:E CANCEL")
-  }
-
 
   const clearItems = async (): Promise<void> => {
     const deleteRelationshipIds = relationships?.filter(y => y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] === "Question" || y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] === "Answer")?.map(x => x?.gyde_surveyworkitemrelatedsurveyitemid);
@@ -831,16 +665,6 @@ const ParentComponent = ({
   return (
     <div>
       {contextHolder}
-      {/* <div className="country-lan">
-        <Radio.Group
-          options={countryMappedConfigs}
-          onChange = { (e: any) => languageChangeHandler(e)}
-          value={selectedLanguage}
-          optionType="button"
-          buttonStyle="solid"
-      />
-
-      </div> */}
       {!isApiDataLoaded ? (
         <div className="validation-wrap">
           {
