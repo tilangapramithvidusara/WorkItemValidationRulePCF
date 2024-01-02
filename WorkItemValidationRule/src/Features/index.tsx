@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   convertJSONFormatToDBFormat,
   findAndUpdateLastNestedIf,
-  removeIfKeyAndGetDbProperty
+  removeIfKeyAndGetDbProperty,
 } from "../Utils/logics.utils";
 import { Button, notification, Radio, Space, Spin, Modal } from "antd";
 import SectionContainer from "./sectionContainer";
@@ -64,12 +64,15 @@ const ParentComponent = ({
   const [isApiDataLoaded, setIsApiDataLoaded] = useState<boolean>(false);
   const [api, contextHolder]: any = notification.useNotification();
   const [questionList, setQuestionList] = useState<any[]>([]);
-  const [questionsForRelationship, setQuestionsForRelationship] = useState<any[]>([]);
+  const [questionsForRelationship, setQuestionsForRelationship] = useState<
+    any[]
+  >([]);
   const [surveyList, setSurveyList] = useState<any[]>([]);
   const [selectedSurvey, setSelectedSurvey] = useState<any>();
   const [localTest, setLocalTest] = useState<any>(true);
   const [relationships, setRelationships] = useState<any[]>([]);
-  const [initialLoadWithNoSurvey, setInitialLoadWithNoSurvey] = useState<any>(false);
+  const [initialLoadWithNoSurvey, setInitialLoadWithNoSurvey] =
+    useState<any>(false);
   const [disableSaveButton, setDisableSaveButton] = useState<any>(false);
   const [languageConstants, setLanguageConstants] = useState<any>(
     languageConstantsForCountry.en
@@ -95,11 +98,9 @@ const ParentComponent = ({
     setIsNested(false);
   };
 
-
-
   const loadQuestionHandler = async (selectedSurvey: any) => {
     setIsApiDataLoaded(true);
-    if(localTest) setIsApiDataLoaded(false)
+    if (localTest) setIsApiDataLoaded(false);
     const result = await loadAllQuestionsInSurvey(selectedSurvey);
     console.log("resss =====> ", result);
     let questionListArray = result.data || [];
@@ -124,13 +125,13 @@ const ParentComponent = ({
             questionId: quesNme?.gyde_surveytemplatechaptersectionquestionid,
             sectionId: quesNme?._gyde_surveytemplatechaptersection_value,
             status: "A",
-            internalId: quesNme?.gyde_internalid
+            internalId: quesNme?.gyde_internalid,
           };
       });
       formattedQuestionList &&
         formattedQuestionList.length &&
         setQuestionList(formattedQuestionList?.filter((x: any) => x));
-        setIsApiDataLoaded(false);
+      setIsApiDataLoaded(false);
     } else {
       setQuestionList([]);
       setIsApiDataLoaded(false);
@@ -147,21 +148,27 @@ const ParentComponent = ({
     );
     if (_nestedRows?.length === 0 || !_nestedRows?.length)
       setIsApiDataLoaded(false);
-    console.log("_nestedRows", _nestedRows)
+    console.log("_nestedRows", _nestedRows);
   }, [_nestedRows]);
 
   const messageHandler = async () => {
     try {
       const languageConstantsFromResTable = await loadResourceString();
       if (languageConstantsFromResTable?.data && languageConstants?.length) {
-        console.log("languageConstantsFromResTable 2", languageConstantsFromResTable);
-        const mergedObject = languageConstantsFromResTable?.data.reduce((result: any, currentObject: any) => {
-          return Object.assign(result, currentObject);
-        }, {});
+        console.log(
+          "languageConstantsFromResTable 2",
+          languageConstantsFromResTable
+        );
+        const mergedObject = languageConstantsFromResTable?.data.reduce(
+          (result: any, currentObject: any) => {
+            return Object.assign(result, currentObject);
+          },
+          {}
+        );
         if (Object.keys(mergedObject).length) {
           const originalConstants = languageConstants[0];
           const updatedValues = mergedObject[0];
-  
+
           for (const key in updatedValues) {
             if (key in updatedValues && key in originalConstants) {
               originalConstants[key] = updatedValues[key];
@@ -171,10 +178,10 @@ const ParentComponent = ({
         }
       }
     } catch (error) {
-      console.log('error ====>', error);
+      console.log("error ====>", error);
     }
-  }
-  
+  };
+
   // for retrieve purpose
   useEffect(() => {
     setSections(
@@ -200,7 +207,9 @@ const ParentComponent = ({
       _visibilityRulePrev.forEach((dbData) => {
         console.log("Loading Visibility Data", dbData);
         _setNestedRows((prevData: any) => {
-          let visibilityString = dbData?.visibility?.if?.length ? dbData?.visibility?.if : [dbData?.visibility]
+          let visibilityString = dbData?.visibility?.if?.length
+            ? dbData?.visibility?.if
+            : [dbData?.visibility];
           console.log("visibilityString", visibilityString);
           if (visibilityString) {
             // const visibilityString = dbData?.visibility?.if;
@@ -217,9 +226,12 @@ const ParentComponent = ({
               const keys = x?.or?.map((x: {}) => Object.keys(x)[0]);
               return keys?.includes("and") || keys?.includes("or");
             });
-            const isNestedIfs = visibilityDta?.some((x: {}) => Object.keys(x)[0] === 'if');
-            const isFirst = visibilityDta?.length === 1
-            const isFirstCon = visibilityDta && visibilityDta?.length && !visibilityDta[2]
+            const isNestedIfs = visibilityDta?.some(
+              (x: {}) => Object.keys(x)[0] === "if"
+            );
+            const isFirst = visibilityDta?.length === 1;
+            const isFirstCon =
+              visibilityDta && visibilityDta?.length && !visibilityDta[2];
             console.log("Fetch Type isRetrieveAsNormal ", isRetrieveAsNormal);
             console.log("Fetch Type isFirstExp", isFirstExp);
             console.log("Fetch Type isAllAreNormal", isAllAreNormal);
@@ -232,18 +244,14 @@ const ParentComponent = ({
               // refactorDta = visibilityDta[0]?.or?.length ? visibilityDta[0]?.or : visibilityDta[0]?.and
               refactorDta = visibilityDta;
             } else if (isFirstCon) {
-              refactorDta = [{ or: [
-                { "if": visibilityDta }
-              ] }]
+              refactorDta = [{ or: [{ if: visibilityDta }] }];
             } else if (isAllAreNormal) {
               refactorDta = visibilityDta[0]?.or;
             } else if (isFirstExp) {
               // refactorDta = visibilityDta;
               refactorDta = [{ or: Object.values(visibilityDta[0])[0] }];
-            } else if (isFirst) { 
-              refactorDta = [{ or: [
-                { "if": [visibilityDta[0]] }
-              ] }];
+            } else if (isFirst) {
+              refactorDta = [{ or: [{ if: [visibilityDta[0]] }] }];
             } else {
               refactorDta = removeIfKeyAndGetDbProperty(visibilityDta);
             }
@@ -305,7 +313,7 @@ const ParentComponent = ({
   const getRequestedData = async () => {
     let visibilityRulePreviousValues: any;
     setIsApiDataLoaded(false);
-    let logicalName = dbConstants.question.fieldName
+    let logicalName = dbConstants.question.fieldName;
 
     visibilityRulePreviousValues = await fetchRequest(
       logicalName,
@@ -313,13 +321,22 @@ const ParentComponent = ({
       `?$select=${dbConstants.common.gyde_visibilityrule}`
     );
     console.log("visibilityRulePreviousValues", visibilityRulePreviousValues);
-    if (visibilityRulePreviousValues?.data && Object.keys(visibilityRulePreviousValues?.data).length !== 0) {
+    if (
+      visibilityRulePreviousValues?.data &&
+      Object.keys(visibilityRulePreviousValues?.data).length !== 0
+    ) {
       console.log(
         "visibilityRulePreviousValues -----> ",
         visibilityRulePreviousValues
       );
-      let _visibilityRulePreviousValues = JSON.parse(visibilityRulePreviousValues?.data);
-      if ((_visibilityRulePreviousValues && _visibilityRulePreviousValues?.data?.length) || Object.keys(visibilityRulePreviousValues?.data).length !== 0) {
+      let _visibilityRulePreviousValues = JSON.parse(
+        visibilityRulePreviousValues?.data
+      );
+      if (
+        (_visibilityRulePreviousValues &&
+          _visibilityRulePreviousValues?.data?.length) ||
+        Object.keys(visibilityRulePreviousValues?.data).length !== 0
+      ) {
         _setVisibilityRulePrev((prevData: any) => [
           ...prevData,
           { visibility: _visibilityRulePreviousValues },
@@ -330,36 +347,41 @@ const ParentComponent = ({
   const getCurrentPublishedStatus = async () => {
     const { data = null } = await getPublishedStatus(currentPossitionDetails);
     console.log("Published Status", data);
-    if(data?.isPublished) setSuerveyIsPublished(data?.isPublished);
-  }
+    if (data?.isPublished) setSuerveyIsPublished(data?.isPublished);
+  };
 
   const _getSurveyListByWorkItemId = async () => {
-    const { data = [] } = await getSurveyListByWorkItemId(currentPossitionDetails?.id);
-    console.log("data", data)
-    if(localTest) setSurveyList([
-      {
-          "@odata.etag": "W/\"3708593\"",
-          "gyde_surveytemplateid": "710bdde6-053c-ee11-bdf4-002248079177",
-          "gyde_name": "AS_Tst"
-      },
-      {
-          "@odata.etag": "W/\"3700979\"",
-          "gyde_surveytemplateid": "11cfa406-a040-ee11-be6d-002248079177",
-          "gyde_name": "TS_EB2"
-      }
-  ])
+    const { data = [] } = await getSurveyListByWorkItemId(
+      currentPossitionDetails?.id
+    );
+    console.log("data", data);
+    if (localTest)
+      setSurveyList([
+        {
+          "@odata.etag": 'W/"3708593"',
+          gyde_surveytemplateid: "710bdde6-053c-ee11-bdf4-002248079177",
+          gyde_name: "AS_Tst",
+        },
+        {
+          "@odata.etag": 'W/"3700979"',
+          gyde_surveytemplateid: "11cfa406-a040-ee11-be6d-002248079177",
+          gyde_name: "TS_EB2",
+        },
+      ]);
     if (data?.length) {
-      setSurveyList(data)
-      if(data?.length === 1) setSelectedSurvey(data[0]?.gyde_surveytemplateid)
+      setSurveyList(data);
+      if (data?.length === 1) setSelectedSurvey(data[0]?.gyde_surveytemplateid);
     }
-  }
+  };
   const _getWorkItemRelationshipByWorkitemId = async () => {
-    const { data = [] } = await getWorkItemRelationshipByWorkitemId(currentPossitionDetails?.id);
+    const { data = [] } = await getWorkItemRelationshipByWorkitemId(
+      currentPossitionDetails?.id
+    );
     console.log("RelationShipsss", data);
     if (!data?.error) {
       setRelationships(data);
     }
-  }
+  };
 
   useEffect(() => {
     console.log("currentId ----->", currentPossitionDetails);
@@ -377,134 +399,175 @@ const ParentComponent = ({
       _setNestedRows((prevNestedRows: any) => {
         return prevNestedRows.filter(
           (key: any) => parseInt(Object.keys(key)[0]) !== deleteSectionKey
-        )
+        );
       });
       setSections((prev: any) =>
         prev.filter((prevKeys: any) => prevKeys.key !== deleteSectionKey)
       );
     }
-  }
+  };
 
   const _getCurrentState = async () => {
     const result = await getWorkItemId();
     console.log("Current State Details ----> ", result);
     if (result?.data) setCurrentPossitionDetails(result?.data);
   };
-  
-  const saveVisibilityData = async (
-    visibilityRule: any,
-  ) => {
-    let logicalName = dbConstants.question.fieldName
-  
+
+  const saveVisibilityData = async (visibilityRule: any) => {
+    let logicalName = dbConstants.question.fieldName;
+
     const result = await saveRequest(logicalName, currentPossitionDetails?.id, {
       [dbConstants.common.gyde_visibilityrule]:
         // JSON.stringify(visibilityRule),
-        Object.keys(visibilityRule).length === 0 ? "" : JSON.stringify(visibilityRule)
+        Object.keys(visibilityRule).length === 0
+          ? ""
+          : JSON.stringify(visibilityRule),
     });
     if (result?.data) {
-      openNotificationWithIcon(result?.data?.error ? "error" : "success", result?.data?.error ? languageConstants?.ExpressionBuilder_ErrorOccured : languageConstants?.ExpressionBuilder_DataSaved);
+      openNotificationWithIcon(
+        result?.data?.error ? "error" : "success",
+        result?.data?.error
+          ? languageConstants?.ExpressionBuilder_ErrorOccured
+          : languageConstants?.ExpressionBuilder_DataSaved
+      );
     }
 
-    await handleRelationshipEntity(); 
+    await handleRelationshipEntity();
   };
 
   const handleRelationshipEntity = async () => {
     let _prepareForRelationship: any;
     let relationshipCreationArray: any = [];
 
-    const existanceRelationshipIds = relationships?.map(rela => {
-      const nameLbl = rela?.gyde_name?.split('-');
-      console.log("extractedString nameLbl", nameLbl);
-      if (rela?.gyde_itemtype === dbConstants?.common?.item_type_question && nameLbl?.length > 1) {
+    const existanceRelationshipIds = relationships
+      ?.map((rela) => {
+        const nameLbl = rela?.gyde_name?.split("-");
+        console.log("extractedString nameLbl", nameLbl);
+        if (
+          rela?.gyde_itemtype === dbConstants?.common?.item_type_question &&
+          nameLbl?.length > 1
+        ) {
           const extractedString = nameLbl[0].trim();
           console.log("extractedString", extractedString);
           return extractedString;
-      }
-    })?.filter(x => x);
+        }
+      })
+      ?.filter((x) => x);
 
-    console.log("existanceRelationshipIds", existanceRelationshipIds)
+    console.log("existanceRelationshipIds", existanceRelationshipIds);
     for (const sec of _nestedRows) {
       const key = Object.keys(sec)[0];
       _prepareForRelationship = JSON.parse(JSON.stringify(sec[key].fields));
-    
-      await Promise.all(_prepareForRelationship?.map(async (relField: any) => {
-        let selectedValue: any = questionList?.find((x: { value: any; }) => x?.value === relField?.field);
-        let answerObject: any = {};
-        let questionObject: any = {};
-        console.log("selectedValue xxxxxxx ", selectedValue);
-        if (selectedValue?.questionType === "List") {
-          console.log("RELATIONSHIPSSS", relationships);
-          const relationshipSets = relationships?.map((set: any) => {
-            set?.gyde_name
-          });
-          console.log("RELATIONSHIPSSS", relationshipSets);
 
-          const response = await getListAnswersByQuestionId(selectedValue?.questionId);
-          let listAnswers = [];
-    
-          if (response?.data?.entities) {
-            listAnswers = response?.data.entities.map((x: any) => ({
-              value: x.gyde_answervalue,
-            }));
-          }
-    
-          if (listAnswers[0]?.value) {
-            if (relField?.condition !== 'con') {
-              answerObject = {
-                "label": selectedValue?.label,
-                "value": listAnswers?.length > 0 ? listAnswers[0]?.value : selectedValue?.value, // Set the value based on availability
-                "questionType": selectedValue?.questionType,
-                "questionId": selectedValue?.questionId,
-                "sectionId": selectedValue?.sectionId,
-                "status": selectedValue?.status,
-                "internalId": selectedValue?.internalId,
-                "options": listAnswers[0]?.value
+      await Promise.all(
+        _prepareForRelationship?.map(async (relField: any) => {
+          let selectedValue: any = questionList?.find(
+            (x: { value: any }) => x?.value === relField?.field
+          );
+          let answerObject: any = {};
+          let questionObject: any = {};
+          console.log("selectedValue xxxxxxx ", selectedValue);
+          if (selectedValue?.questionType === "List") {
+            console.log("RELATIONSHIPSSS", relationships);
+            const relationshipSets = relationships?.map((set: any) => {
+              set?.gyde_name;
+            });
+            console.log("RELATIONSHIPSSS", relationshipSets);
+
+            const response = await getListAnswersByQuestionId(
+              selectedValue?.questionId
+            );
+            let listAnswers = [];
+
+            if (response?.data?.entities) {
+              listAnswers = response?.data.entities.map((x: any) => ({
+                value: x.gyde_answervalue,
+              }));
+            }
+
+            if (listAnswers[0]?.value) {
+              if (relField?.condition !== "con") {
+                answerObject = {
+                  label: selectedValue?.label,
+                  value:
+                    listAnswers?.length > 0
+                      ? listAnswers[0]?.value
+                      : selectedValue?.value, // Set the value based on availability
+                  questionType: selectedValue?.questionType,
+                  questionId: selectedValue?.questionId,
+                  sectionId: selectedValue?.sectionId,
+                  status: selectedValue?.status,
+                  internalId: selectedValue?.internalId,
+                  options: listAnswers[0]?.value,
+                };
+              }
+            }
+            if (
+              !existanceRelationshipIds?.includes(selectedValue?.questionId)
+            ) {
+              questionObject = {
+                label: selectedValue?.label,
+                value: selectedValue?.label, // Set the value based on availability
+                questionType: selectedValue?.questionType,
+                questionId: selectedValue?.questionId,
+                sectionId: selectedValue?.sectionId,
+                status: selectedValue?.status,
+                internalId: selectedValue?.internalId,
+                usedInCreationRule:
+                  relField?.condition === "con" ? true : "false",
               };
             }
+
+            if (Object.keys(answerObject)?.length !== 0) {
+              relationshipCreationArray.push(answerObject);
+            }
+            if (Object.keys(questionObject)?.length !== 0) {
+              relationshipCreationArray.push(questionObject);
+            }
           }
-          if (!existanceRelationshipIds?.includes(selectedValue?.questionId)) {
-            questionObject = {
-              "label": selectedValue?.label,
-              "value": selectedValue?.label, // Set the value based on availability
-              "questionType": selectedValue?.questionType,
-              "questionId": selectedValue?.questionId,
-              "sectionId": selectedValue?.sectionId,
-              "status": selectedValue?.status,
-              "internalId": selectedValue?.internalId,
-              "usedInCreationRule": relField?.condition === 'con' ? true : "false"
-            };
-          }
-         
-          if (Object.keys(answerObject)?.length !== 0) {
-            relationshipCreationArray.push(answerObject);
-          }
-          if (Object.keys(questionObject)?.length !== 0) {
-            relationshipCreationArray.push(questionObject);
-          }  
-        }
-    
-        console.log("selectedValueselectedValue", selectedValue);
-        if (selectedValue?.questionType !== "List" && Object.keys(selectedValue)?.length !== 0) {
-          // if (Object.keys(selectedValue)?.length !== 0) {
+
+          console.log("selectedValueselectedValue", selectedValue);
+          if (
+            selectedValue?.questionType !== "List" &&
+            Object.keys(selectedValue)?.length !== 0
+          ) {
+            // if (Object.keys(selectedValue)?.length !== 0) {
             relationshipCreationArray.push(selectedValue);
-          // }
-        }
-      }));
-    
+            // }
+          }
+        })
+      );
+
       console.log("relationshipCreationArray", relationshipCreationArray);
     }
-    
+
     if (relationshipCreationArray && relationshipCreationArray?.length) {
-      await createRelationshipForWI(currentPossitionDetails?.id, relationshipCreationArray);
+      await createRelationshipForWI(
+        currentPossitionDetails?.id,
+        relationshipCreationArray
+      );
     }
-    
-    const sectionOrChapterRelationships = relationships?.filter(x => x["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] === "Chapter" || x["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] === "Section");
+
+    const sectionOrChapterRelationships = relationships?.filter(
+      (x) =>
+        x["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] ===
+          "Chapter" ||
+        x["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] ===
+          "Section"
+    );
     console.log("sectionOrChapterRelationships", sectionOrChapterRelationships);
-    if (sectionOrChapterRelationships && sectionOrChapterRelationships?.length) {
-      let record : any = {};
-      record["gyde_isusedincreationrule"] = false; 
+    if (
+      sectionOrChapterRelationships &&
+      sectionOrChapterRelationships?.length
+    ) {
+      let record: any = {};
+      record["gyde_isusedincreationrule"] = false;
       for (const relat of sectionOrChapterRelationships) {
-        await updateDataRequest(dbConstants?.common?.gyde_surveyworkitemrelatedsurveyitem, relat?.gyde_surveyworkitemrelatedsurveyitemid, record);
+        await updateDataRequest(
+          dbConstants?.common?.gyde_surveyworkitemrelatedsurveyitem,
+          relat?.gyde_surveyworkitemrelatedsurveyitemid,
+          record
+        );
       }
     }
     setTimeout(async () => {
@@ -512,10 +575,7 @@ const ParentComponent = ({
       await reloadPage();
       setDisableSaveButton(false);
     }, 3000); // 2000 milliseconds = 2 seconds
-
-  }
-
-
+  };
 
   const handleSaveLogic = async () => {
     let visibilityRuleNormal: any = [];
@@ -523,7 +583,7 @@ const ParentComponent = ({
     let deleteRelationshipIds: any;
     let fieldsLables: any;
 
-    let findNullFields = false
+    let findNullFields = false;
     setDisableSaveButton(true);
 
     _nestedRows.forEach((sec: any) => {
@@ -544,22 +604,27 @@ const ParentComponent = ({
       // const _filterFieldsForWI = sec[key]?.fields?.filter((x: any) => x?.condition !== 'con');
       // console.log("_filterFieldsForWI", _filterFieldsForWI);
       // if (_filterFieldsForWI && _filterFieldsForWI?.length) {
-        let _visibility : any = convertJSONFormatToDBFormat(sec[key], true);
+      let _visibility: any = convertJSONFormatToDBFormat(sec[key], true);
       console.log("_visibility before", _visibility);
-      
+
       if (_visibility) {
-        const firstKey : any = Object.keys(_visibility) 
-        _visibility = _visibility[firstKey]?.filter((x: any) => x?.if?.length !== 3)
-        if(_visibility?.length) visibilityRuleNormal.push({[firstKey]: _visibility });
+        const firstKey: any = Object.keys(_visibility);
+        _visibility = _visibility[firstKey]?.filter(
+          (x: any) => x?.if?.length !== 3
+        );
+        if (_visibility?.length)
+          visibilityRuleNormal.push({ [firstKey]: _visibility });
       }
 
       // }
       console.log("_visibility After", visibilityRuleNormal);
-
     });
 
     if (findNullFields) {
-      openNotificationWithIcon("error", languageConstants?.ExpressionBuilder_FieldsEmpty);
+      openNotificationWithIcon(
+        "error",
+        languageConstants?.ExpressionBuilder_FieldsEmpty
+      );
       setDisableSaveButton(false);
       return;
     }
@@ -578,28 +643,38 @@ const ParentComponent = ({
     //       }
     //     }
     // })?.map(x => x?.gyde_surveyworkitemrelatedsurveyitemid);
-    deleteRelationshipIds = relationships?.filter(y => y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] === "Question" || y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] === "Answer")?.map(x => x?.gyde_surveyworkitemrelatedsurveyitemid);
+    deleteRelationshipIds = relationships
+      ?.filter(
+        (y) =>
+          y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] ===
+            "Question" ||
+          y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] ===
+            "Answer"
+      )
+      ?.map((x) => x?.gyde_surveyworkitemrelatedsurveyitemid);
     console.log("deleteRelationshipIds 1", deleteRelationshipIds);
     // if (deleteRelationshipIds?.length) {
     //   console.log("deleteRelationshipIds 2", deleteRelationshipIds)
     //   await xrmDeleteRequest(dbConstants?.common?.gyde_surveyworkitemrelatedsurveyitem, deleteRelationshipIds);
     // }
-    const deleteResult = await xrmDeleteRequest(dbConstants?.common?.gyde_surveyworkitemrelatedsurveyitem, deleteRelationshipIds);
+    const deleteResult = await xrmDeleteRequest(
+      dbConstants?.common?.gyde_surveyworkitemrelatedsurveyitem,
+      deleteRelationshipIds
+    );
 
     if (!deleteResult?.error) {
       await _getWorkItemRelationshipByWorkitemId();
       let savedVisibilityRuleFinalFormat: any = [];
-      if (
-        visibilityRuleNormal.length === 1
-      ) {
+      if (visibilityRuleNormal.length === 1) {
         if (visibilityRuleNormal[0][""] && visibilityRuleNormal[0][""][0]) {
-          savedVisibilityRuleFinalFormat = visibilityRuleNormal[0][""][0]?.if[0]
-          if (visibilityRuleNormal[0][""][0]?.if[1]) savedVisibilityRuleFinalFormat = visibilityRuleNormal[0][""][0]
-          console.log("Length is one", savedVisibilityRuleFinalFormat)
-
+          savedVisibilityRuleFinalFormat =
+            visibilityRuleNormal[0][""][0]?.if[0];
+          if (visibilityRuleNormal[0][""][0]?.if[1])
+            savedVisibilityRuleFinalFormat = visibilityRuleNormal[0][""][0];
+          console.log("Length is one", savedVisibilityRuleFinalFormat);
         } else {
-          console.log("Length more than one", visibilityRuleNormal[0])
-          savedVisibilityRuleFinalFormat = visibilityRuleNormal[0]
+          console.log("Length more than one", visibilityRuleNormal[0]);
+          savedVisibilityRuleFinalFormat = visibilityRuleNormal[0];
         }
       }
       console.log(
@@ -607,32 +682,41 @@ const ParentComponent = ({
         savedVisibilityRuleFinalFormat
       );
       await saveVisibilityData(
-        savedVisibilityRuleFinalFormat ? savedVisibilityRuleFinalFormat : {},
-      )
+        savedVisibilityRuleFinalFormat ? savedVisibilityRuleFinalFormat : {}
+      );
     }
     setDisableSaveButton(false);
   };
 
   const _getQuestionInfoByQuestionName = async (questionName: any) => {
-    const questionDetails: any = await getQuestionInfoByQuestionName(questionName);
+    const questionDetails: any = await getQuestionInfoByQuestionName(
+      questionName
+    );
     if (questionDetails?.data) {
-      const survey = surveyList?.find(x => x?.gyde_name === questionDetails?.data["_gyde_surveytemplate_value@OData.Community.Display.V1.FormattedValue"]);
-      if(survey?.gyde_surveytemplateid) setSelectedSurvey(survey?.gyde_surveytemplateid)
-      if (!survey) setInitialLoadWithNoSurvey(true)
+      const survey = surveyList?.find(
+        (x) =>
+          x?.gyde_name ===
+          questionDetails?.data[
+            "_gyde_surveytemplate_value@OData.Community.Display.V1.FormattedValue"
+          ]
+      );
+      if (survey?.gyde_surveytemplateid)
+        setSelectedSurvey(survey?.gyde_surveytemplateid);
+      if (!survey) setInitialLoadWithNoSurvey(true);
       else setInitialLoadWithNoSurvey(false);
     } else {
-      setInitialLoadWithNoSurvey(false)
+      setInitialLoadWithNoSurvey(false);
     }
-  }
+  };
   useEffect(() => {
     if (surveyList?.length > 0 && _nestedRows?.length > 0) {
       _nestedRows?.forEach((sec: any) => {
         const key = Object.keys(sec)[0];
         let prepareForValidation = JSON.parse(JSON.stringify(sec[key]?.fields));
         _getQuestionInfoByQuestionName(prepareForValidation[0]?.field);
-      })
+      });
     }
-  }, [surveyList, _nestedRows])
+  }, [surveyList, _nestedRows]);
 
   useEffect(() => {
     if (selectedSurvey) {
@@ -642,20 +726,32 @@ const ParentComponent = ({
   }, [selectedSurvey]);
 
   const clearItems = async (): Promise<void> => {
-    const deleteRelationshipIds = relationships?.filter(y => y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] === "Question" || y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] === "Answer")?.map(x => x?.gyde_surveyworkitemrelatedsurveyitemid);
+    const deleteRelationshipIds = relationships
+      ?.filter(
+        (y) =>
+          y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] ===
+            "Question" ||
+          y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] ===
+            "Answer"
+      )
+      ?.map((x) => x?.gyde_surveyworkitemrelatedsurveyitemid);
     console.log("deleteRelationshipIds 1", deleteRelationshipIds);
-    const deleteResult = await xrmDeleteRequest(dbConstants?.common?.gyde_surveyworkitemrelatedsurveyitem, deleteRelationshipIds);
+    const deleteResult = await xrmDeleteRequest(
+      dbConstants?.common?.gyde_surveyworkitemrelatedsurveyitem,
+      deleteRelationshipIds
+    );
     if (!deleteResult?.error) {
       await saveVisibilityData({});
-      _setNestedRows(null)
+      _setNestedRows(null);
     }
-  }
+  };
 
   const showPromiseConfirm: any = async () => {
     confirm({
-      title: 'Do you want to clear the creation rule?',
+      title: "Do you want to clear the creation rule?",
       icon: <ExclamationCircleFilled />,
-      content: 'When the OK button is clicked, all the relationships associated with the creation rule will be deleted.',
+      content:
+        "When the OK button is clicked, all the relationships associated with the creation rule will be deleted.",
       onOk() {
         return clearItems();
       },
@@ -667,70 +763,80 @@ const ParentComponent = ({
       {contextHolder}
       {!isApiDataLoaded ? (
         <div className="validation-wrap">
-          {
-            (initialLoadWithNoSurvey || (selectedSurvey && !surveyList?.some(e => e.gyde_surveytemplateid === selectedSurvey))) &&
-            <div className="validation-text mb-15"> 
-                {/* * Selected Survey Not Exists in the workitem template */}
-                {`* ` + languageConstants?.ExpressionBuilder_SurveyExistsWIT}
+          {(initialLoadWithNoSurvey ||
+            (selectedSurvey &&
+              !surveyList?.some(
+                (e) => e.gyde_surveytemplateid === selectedSurvey
+              ))) && (
+            <div className="validation-text mb-15">
+              {/* * Selected Survey Not Exists in the workitem template */}
+              {`* ` + languageConstants?.ExpressionBuilder_SurveyExistsWIT}
             </div>
-          }
-          <div style={{textAlign:'right', position:'relative', top: '33px', marginRight:'13px'}}>
-          <Space wrap>
-            <Button onClick={showPromiseConfirm}>Reset</Button>
-             
-          </Space>
+          )}
+          <div
+            style={{
+              textAlign: "right",
+              position: "relative",
+              top: "33px",
+              marginRight: "13px",
+            }}
+          >
+            <Space wrap>
+              <Button onClick={showPromiseConfirm}>Reset</Button>
+            </Space>
           </div>
-          
-        
+
           {((currentPossitionDetails && surveyList?.length) || localTest) && (
-            
             <div>
-              {
-                (surveyList?.length > 1 || localTest) &&
-                <div className="survey-list"> 
+              {(surveyList?.length > 1 || localTest) && (
+                <div className="survey-list">
                   <PickServeyContainer
                     surveyList={surveyList}
                     setSelectedSurvey={setSelectedSurvey}
                     selectedSurvey={selectedSurvey}
                     _nestedRows={_nestedRows}
-                      handleSectionRemove={handleSectionRemove}
-                      languageConstants={languageConstants}
+                    handleSectionRemove={handleSectionRemove}
+                    languageConstants={languageConstants}
                   />
-              </div>
-              }
-              
-              {
-                selectedSurvey && <div> 
-                <div className="nestedBtns">
-                  <Button
-                    className="mr-10 btn-default"
-                    onClick={addComponent}
-                    disabled={suerveyIsPublished || _nestedRows?.length > 0}>
-                     {`+ ${languageConstants?.ExpressionBuilder_AddButton}`}
-                  </Button>
                 </div>
-                {sections?.length > 0 && questionList?.length > 0 &&
-                  sections.map((section) => (
-                    <div key={section.key} className="nested-wrap">
-                      <SectionContainer
-                        sectionLevel={section.key}
-                        conditionData={conditionData}
-                        setConditionData={setConditionData}
-                        _setNestedRows={_setNestedRows}
-                        _nestedRows={_nestedRows}
-                        isNested={isNested}
-                        currentPossitionDetails={currentPossitionDetails}
-                        questionList={questionList}
-                        setValidation={setValidation}
-                        imageUrls={{ imageUrl, imageUrl1, imageUrl2 }}
-                        suerveyIsPublished={suerveyIsPublished}
-                        handleSectionRemove={handleSectionRemove}
-                        setQuestionsForRelationship={setQuestionsForRelationship}
-                        languageConstants={languageConstants}
-                      />
-                    </div>
-                  ))}
-  
+              )}
+
+              {selectedSurvey && (
+                <div>
+                  <div className="nestedBtns">
+                    <Button
+                      className="mr-10 btn-default"
+                      onClick={addComponent}
+                      disabled={suerveyIsPublished || _nestedRows?.length > 0}
+                    >
+                      {`+ ${languageConstants?.ExpressionBuilder_AddButton}`}
+                    </Button>
+                  </div>
+                  {sections?.length > 0 &&
+                    questionList?.length > 0 &&
+                    sections.map((section) => (
+                      <div key={section.key} className="nested-wrap">
+                        <SectionContainer
+                          sectionLevel={section.key}
+                          conditionData={conditionData}
+                          setConditionData={setConditionData}
+                          _setNestedRows={_setNestedRows}
+                          _nestedRows={_nestedRows}
+                          isNested={isNested}
+                          currentPossitionDetails={currentPossitionDetails}
+                          questionList={questionList}
+                          setValidation={setValidation}
+                          imageUrls={{ imageUrl, imageUrl1, imageUrl2 }}
+                          suerveyIsPublished={suerveyIsPublished}
+                          handleSectionRemove={handleSectionRemove}
+                          setQuestionsForRelationship={
+                            setQuestionsForRelationship
+                          }
+                          languageConstants={languageConstants}
+                        />
+                      </div>
+                    ))}
+
                   <div className="text-right">
                     <Button
                       onClick={handleSaveLogic}
@@ -739,21 +845,20 @@ const ParentComponent = ({
                     >
                       {/* Save */}
                       {languageConstants?.ExpressionBuilder_SaveButtonConstants}
-
                     </Button>
                   </div>
-              
                 </div>
-              }
-              
-              </div>
+              )}
+            </div>
           )}
         </div>
       ) : (
         <Space size="middle">
           <div>
-            <div>{languageConstants?.ExpressionBuilder_QuestionsLoadingConstants}</div>
-              <div style={{marginTop: '10px'}}>
+            <div>
+              {languageConstants?.ExpressionBuilder_QuestionsLoadingConstants}
+            </div>
+            <div style={{ marginTop: "10px" }}>
               <Spin />
             </div>
           </div>

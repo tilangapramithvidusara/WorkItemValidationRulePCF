@@ -99,7 +99,9 @@ const RowContainer: React.FC<TableRowProps> = ({
   const [listQuestionIds, setListQuestionIds] = useState<any>();
   const [listQuestionLoading, setListQuestionLoading] = useState<any>(false);
   const [_selectedValue, _setSelectedValue] = useState<any>(null);
-  const [dropdowOperators, setDropdowOperators] = useState<any>(operationalSampleData[0]?.options);
+  const [dropdowOperators, setDropdowOperators] = useState<any>(
+    operationalSampleData[0]?.options
+  );
 
   const [sameOperatorValidation, setSameOperatorValidation] =
     useState<any>(true);
@@ -445,7 +447,10 @@ const RowContainer: React.FC<TableRowProps> = ({
       ?.find((x: any[]) => x[sectionLevel])
       ?.[sectionLevel]?.fields?.map((lvl: any) => lvl?.condition);
     console.log("ISCONTAIN", isContainInclude);
-    console.log("ISCONTAIN _nestedRows", _nestedRows?.find((x: any[]) => x[sectionLevel])?.[sectionLevel]?.fields);
+    console.log(
+      "ISCONTAIN _nestedRows",
+      _nestedRows?.find((x: any[]) => x[sectionLevel])?.[sectionLevel]?.fields
+    );
 
     console.log("ISCONTAIN", isContainInclude?.includes("con"));
     setDropdowOperators(
@@ -460,7 +465,6 @@ const RowContainer: React.FC<TableRowProps> = ({
             (item: { value: string }) => item?.value !== "con"
           )
     );
-
   }, [_nestedRows]);
 
   useEffect(() => {
@@ -803,8 +807,7 @@ const RowContainer: React.FC<TableRowProps> = ({
                     dbConstants.questionTypes.numericQuestion ? (
                       <DropDown
                         dropDownData={dropdowOperators?.filter(
-                          (item: { value: string }) =>
-                            item?.value === "!=" 
+                          (item: { value: string }) => item?.value === "!="
                         )}
                         isDisabled={
                           suerveyIsPublished ? suerveyIsPublished : false
