@@ -69,7 +69,7 @@ const ParentComponent = ({
   >([]);
   const [surveyList, setSurveyList] = useState<any[]>([]);
   const [selectedSurvey, setSelectedSurvey] = useState<any>();
-  const [localTest, setLocalTest] = useState<any>(true);
+  const [localTest, setLocalTest] = useState<any>(false);
   const [relationships, setRelationships] = useState<any[]>([]);
   const [initialLoadWithNoSurvey, setInitialLoadWithNoSurvey] =
     useState<any>(false);

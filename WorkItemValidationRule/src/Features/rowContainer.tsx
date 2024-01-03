@@ -807,7 +807,7 @@ const RowContainer: React.FC<TableRowProps> = ({
                     dbConstants.questionTypes.numericQuestion ? (
                       <DropDown
                         dropDownData={dropdowOperators?.filter(
-                          (item: { value: string }) => item?.value === "!="
+                          (item: { value: string }) => item?.value !== "!="
                         )}
                         isDisabled={
                           suerveyIsPublished ? suerveyIsPublished : false
