@@ -12,7 +12,6 @@ declare global {
 
 export const loadAllQuestionsInSurvey = async (surveyTemplateId: any) => {
   try {    
-    // const templateID = await window.parent.Xrm.Page.ui._formContext.getAttribute("gyde_surveytemplate").getValue()[0].id.replace("{", "").replace("}", "");
     console.log('template id =========> ', surveyTemplateId);
     const result = await window.parent.Xrm.WebApi.retrieveMultipleRecords("gyde_surveytemplatechaptersectionquestion", "?$select=gyde_name,gyde_answertype,_gyde_surveytemplatechaptersection_value,gyde_shortname,gyde_internalid&$filter= _gyde_surveytemplate_value eq " + surveyTemplateId);
     console.log("result ===========> ", result);
@@ -34,7 +33,6 @@ export const loadAllQuestionsInSurvey = async (surveyTemplateId: any) => {
 
 export const getCurrentState = async () => {
   try {    
-    // let result = await window.parent.Xrm.Page.ui._formContext.getAttribute("gyde_relatedsurveytemplateitem").getValue();
     const entityTypeName = window.parent.Xrm.Page.ui._formContext.contextToken.entityTypeName
     console.log("entityTypeName State ===========> ", entityTypeName);
     const updatedId = parent.Xrm.Page.ui.formContext.data.entity.getId().replace("{", "").replace("}", "");
@@ -253,27 +251,6 @@ export const createRelationshipForWI = async (workitemId: any, updateRecordDetai
 
 export const getSurveyListByWorkItemId = async (workItemId: any): Promise<any> => {
   try {
-    // let workItemId = await window.parent.Xrm.Page.ui.formContext.data.entity.getId().replace("{", "").replace("}", "");
-    // let workItemId = "322A7003-514D-EE11-BE6F-6045BDD0EF22";
-  //   let fetchXml = `?fetchXml=<fetch top='50'>
-  //   <entity name='gyde_surveytemplate'>
-  //     <attribute name='gyde_surveytemplateid' />
-  //     <attribute name='gyde_name' />
-  //     <filter>
-  //       <condition attribute='statuscode' operator='in' >
-  //         <value>1</value>
-  //         <value>528670001</value>
-  //       </condition>
-  //     </filter>
-  //     <link-entity name='gyde_workitemtemplate' from='gyde_workitemtemplateid' to='gyde_workitemtemplate'>
-  //       <link-entity name='gyde_workitemtemplatesequence' from='gyde_workitemtemplate' to='gyde_workitemtemplateid'>
-  //         <filter>
-  //           <condition attribute='gyde_workitem' operator='eq' value='${workItemId}' />
-  //         </filter>
-  //       </link-entity>
-  //     </link-entity>
-  //   </entity>
-  // </fetch>`
       let fetchXml = `?fetchXml=<fetch top='50'>
         <entity name='gyde_surveytemplate'>
           <attribute name='gyde_surveytemplateid' />
@@ -294,7 +271,6 @@ export const getSurveyListByWorkItemId = async (workItemId: any): Promise<any> =
       const surveyList = await window.parent.Xrm.WebApi.retrieveMultipleRecords("gyde_surveytemplate", fetchXml)
       console.log("surveyListsss", surveyList);
   
-        // await window.parent.Xrm.Page.ui._formContext.getAttribute("gyde_relatedsurveyitem").setRequiredLevel("required");
         /* Set survey item filter */
 
       // const uniqueSurveyListArr = Array.from(new Set(surveyList?.entities?.map((obj: any) => obj?.gyde_name)))?.map(gyde_name => surveyList?.entities?.find((obj: any) => obj?.gyde_name === gyde_name));
@@ -333,8 +309,6 @@ export const getSurveyListByWorkItemId = async (workItemId: any): Promise<any> =
 
 export const getWorkItemIdBySequenceId = async (sequenceId: any): Promise<any> => {
   try {
-    // let workItemId = await window.parent.Xrm.Page.ui.formContext.data.entity.getId().replace("{", "").replace("}", "");
-    // let workItemId = "322A7003-514D-EE11-BE6F-6045BDD0EF22";
     let fetchXml = `?fetchXml=<fetch top="50">
     <entity name="gyde_workitemtemplatesequence">
       <filter>
@@ -348,7 +322,6 @@ export const getWorkItemIdBySequenceId = async (sequenceId: any): Promise<any> =
     </entity>
   </fetch>`;
 
-      // await window.parent.Xrm.Page.ui._formContext.getAttribute("gyde_relatedsurveyitem").setRequiredLevel("required");
       /* Set survey item filter */
       const workitemRelationshipList = await window.parent.Xrm.WebApi.retrieveMultipleRecords("gyde_workitemtemplatesequence", fetchXml)
       console.log("workitemRelationshipList", workitemRelationshipList);
@@ -372,7 +345,6 @@ export const getWorkItemIdBySequenceId = async (sequenceId: any): Promise<any> =
 
 export const getWorkItemRelationshipByWorkitemId = async (workItemId: any): Promise<any> => {
   try {
-    // let workItemId = await window.parent.Xrm.Page.ui.formContext.data.entity.getId().replace("{", "").replace("}", "");
     // let workItemId = "322A7003-514D-EE11-BE6F-6045BDD0EF22";
     let fetchXml = `?fetchXml=<fetch top="50"> 
       <entity name="gyde_surveyworkitemrelatedsurveyitem">
@@ -391,7 +363,6 @@ export const getWorkItemRelationshipByWorkitemId = async (workItemId: any): Prom
       </entity>
       </fetch>`;
 
-      // await window.parent.Xrm.Page.ui._formContext.getAttribute("gyde_relatedsurveyitem").setRequiredLevel("required");
       /* Set survey item filter */
       const workitemRelationshipList = await window.parent.Xrm.WebApi.retrieveMultipleRecords("gyde_surveyworkitemrelatedsurveyitem", fetchXml)
       console.log("workitemRelationshipList", workitemRelationshipList);
@@ -414,8 +385,6 @@ export const getWorkItemRelationshipByWorkitemId = async (workItemId: any): Prom
   
 export const getQuestionInfoByQuestionName = async (questionName: any): Promise<any> => {
   try {
-    // let workItemId = await window.parent.Xrm.Page.ui.formContext.data.entity.getId().replace("{", "").replace("}", "");
-    // let workItemId = "322A7003-514D-EE11-BE6F-6045BDD0EF22";
     let fetchXml = `?fetchXml=<fetch top="50"> 
     <entity name="gyde_surveytemplatechaptersectionquestion">
       <attribute name="gyde_surveytemplate" />
@@ -425,7 +394,6 @@ export const getQuestionInfoByQuestionName = async (questionName: any): Promise<
     </entity>
     </fetch>`;
 
-      // await window.parent.Xrm.Page.ui._formContext.getAttribute("gyde_relatedsurveyitem").setRequiredLevel("required");
       /* Set survey item filter */
       const questionDetails = await window.parent.Xrm.WebApi.retrieveMultipleRecords("gyde_surveytemplatechaptersectionquestion", fetchXml); 
     console.log("questionDetails", questionDetails);
@@ -547,3 +515,25 @@ export const getUserRoles = async (): Promise<any> => {
     console.log('Error', e);
   }
 };
+
+export const getWTSequenceState = async (): Promise<any> => {
+  const currentPosition = await window.parent.Xrm.Page.ui._formContext._entityName;
+  let stateCode : any = {}
+  try {
+  if (currentPosition?.includes('gyde_surveytemplate')) {
+    const paneIdObj = await window.parent.Xrm.App.sidePanes.getAllPanes()._collection;
+    const sequenceId = Object.keys(paneIdObj)[0]
+    const recordDetails = await window.parent.Xrm.WebApi.retrieveRecord("gyde_workitemtemplatesequence", sequenceId, "?$select=statecode,statuscode");
+    console.log("sequence record details", recordDetails);
+    stateCode.stateCode = recordDetails["statecode"]
+  } else {
+    const stateCodeFromXRM = await window.parent.Xrm.Page.ui._formContext.getAttribute("statecode").getValue();
+    stateCode.stateCode = stateCodeFromXRM
+  }
+  console.log("CURRR POS", currentPosition);
+  console.log("State Code", stateCode);
+  return stateCode;
+} catch(e){
+  console.log("GetWIError", e)
+}
+}
