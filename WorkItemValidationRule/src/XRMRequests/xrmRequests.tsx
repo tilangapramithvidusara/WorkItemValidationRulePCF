@@ -278,6 +278,8 @@ export const getSurveyListByWorkItemId = async (workItemId: any): Promise<any> =
         <entity name='gyde_surveytemplate'>
           <attribute name='gyde_surveytemplateid' />
           <attribute name='gyde_name' />
+          <attribute name='gyde_versionnumber' />
+          <attribute name='statuscode' />
           <link-entity name='gyde_workitemtemplate' from='gyde_workitemtemplateid' to='gyde_workitemtemplate'>
             <link-entity name='gyde_workitemtemplatesequence' from='gyde_workitemtemplate' to='gyde_workitemtemplateid'>
               <filter>
@@ -287,13 +289,40 @@ export const getSurveyListByWorkItemId = async (workItemId: any): Promise<any> =
           </link-entity>
         </entity>
       </fetch>`;
-
-      // await window.parent.Xrm.Page.ui._formContext.getAttribute("gyde_relatedsurveyitem").setRequiredLevel("required");
+ 
       /* Set survey item filter */
       const surveyList = await window.parent.Xrm.WebApi.retrieveMultipleRecords("gyde_surveytemplate", fetchXml)
-      console.log("surveyListsss", surveyList)
+      console.log("surveyListsss", surveyList);
+  
+        // await window.parent.Xrm.Page.ui._formContext.getAttribute("gyde_relatedsurveyitem").setRequiredLevel("required");
+        /* Set survey item filter */
+
+      // const uniqueSurveyListArr = Array.from(new Set(surveyList?.entities?.map((obj: any) => obj?.gyde_name)))?.map(gyde_name => surveyList?.entities?.find((obj: any) => obj?.gyde_name === gyde_name));
       // return { error: false, data: surveyList?.entities }
-      return { error: false, data:surveyList?.entities}
+      const draftSurveyList =  surveyList?.entities?.filter((obj : any) => obj["statuscode@OData.Community.Display.V1.FormattedValue"].includes("Draft") || obj["statuscode@OData.Community.Display.V1.FormattedValue"].includes("Published"));
+      console.log("draftSurveyList", draftSurveyList);
+
+      const latestVersions : any = {};
+      surveyList?.entities.forEach((item: { gyde_name: any; gyde_versionnumber: any; }) => {
+        const name = item.gyde_name;
+        const version = item.gyde_versionnumber;
+
+        if (!latestVersions[name] || version > latestVersions[name]) {
+          latestVersions[name] = version;
+        }
+      });
+
+      // Filter the surveyList based on the latest versions
+      const filteredSurveyList = surveyList?.entities.filter((item: { gyde_name: any; gyde_versionnumber: any; }) => {
+        const name = item.gyde_name;
+        const version = item.gyde_versionnumber;
+        return version === latestVersions[name];
+      });
+
+      console.log(filteredSurveyList);
+
+
+      return { error: false, data: filteredSurveyList}
     } catch (e) {
       console.log("Fetch Survey Lists Error", e);
       return { error: true, data: []
@@ -494,3 +523,27 @@ export const loadResourceString = async () : Promise<any> => {
     }
   }
   }
+
+  export const closeTab = async () : Promise<any> =>{
+    var formContext =  window?.parent?.Xrm.Page;
+    // Check if the form context is available
+    if (formContext.ui && formContext.ui.close) {
+        formContext.ui.close();
+    } else {
+        console.error("formContext.ui.close is not available.");
+    }
+}
+
+export const getUserRoles = async (): Promise<any> => {
+  try {
+    const userPrivilages = await window.parent.Xrm.Utility.getGlobalContext().userSettings.roles
+      ._collection;
+    const userroles = [];
+    for (const userRole in userPrivilages) {
+      userroles.push(userPrivilages[userRole].name);
+    }
+    return userroles;
+  } catch (e) {
+    console.log('Error', e);
+  }
+};

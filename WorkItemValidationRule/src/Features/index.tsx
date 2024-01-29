@@ -22,6 +22,8 @@ import {
   getListAnswersByQuestionId,
   loadResourceString,
   updateDataRequest,
+  closeTab,
+  getUserRoles,
 } from "../XRMRequests/xrmRequests";
 import { dbConstants } from "../constants/dbConstants";
 import { normalConverter } from "../Utils/dbFormatToJson";
@@ -48,10 +50,10 @@ const ParentComponent = ({
   const [isLoadData, setIsLoadData] = useState<boolean>(false);
   const [_nestedRows, _setNestedRows] = useState<any>([]);
   const [isNested, setIsNested] = useState<any>();
-  const [currentPossitionDetails, setCurrentPossitionDetails] = useState<any>();
-  // const [currentPossitionDetails, setCurrentPossitionDetails] = useState<any>({
-  //   currentPosition: "question",
-  // });
+  // const [currentPossitionDetails, setCurrentPossitionDetails] = useState<any>();
+  const [currentPossitionDetails, setCurrentPossitionDetails] = useState<any>({
+    currentPosition: "question",
+  });
   const [_visibilityRulePrev, _setVisibilityRulePrev] = useState<any[]>([]);
   const [_enabledRulePrev, _setEnabledPrev] = useState<any[]>([]);
   const [_documentOutputRulePrev, _setDocumentOutputRulePrev] = useState<any[]>(
@@ -69,7 +71,7 @@ const ParentComponent = ({
   >([]);
   const [surveyList, setSurveyList] = useState<any[]>([]);
   const [selectedSurvey, setSelectedSurvey] = useState<any>();
-  const [localTest, setLocalTest] = useState<any>(false);
+  const [localTest, setLocalTest] = useState<any>(true);
   const [relationships, setRelationships] = useState<any[]>([]);
   const [initialLoadWithNoSurvey, setInitialLoadWithNoSurvey] =
     useState<any>(false);
@@ -415,6 +417,14 @@ const ParentComponent = ({
 
   const saveVisibilityData = async (visibilityRule: any) => {
     let logicalName = dbConstants.question.fieldName;
+    // const roles = await getUserRoles();
+    // console.log("User Roles", roles);
+    // if(roles?.length && roles.includes("Partner User")) {
+    //   openNotificationWithIcon("error",
+    //     "Partner cannot add work items"
+    //   );
+    //   return;
+    // }
 
     const result = await saveRequest(logicalName, currentPossitionDetails?.id, {
       [dbConstants.common.gyde_visibilityrule]:
@@ -758,6 +768,14 @@ const ParentComponent = ({
       onCancel() {},
     });
   };
+
+  const handleSaveAndClose = async () => {
+    setIsApiDataLoaded(true);
+    await handleSaveLogic();
+    setIsApiDataLoaded(false);
+    await closeTab();
+  };
+  
   return (
     <div>
       {contextHolder}
@@ -837,6 +855,7 @@ const ParentComponent = ({
                       </div>
                     ))}
 
+                <div style={{display: 'flex'}}>
                   <div className="text-right">
                     <Button
                       onClick={handleSaveLogic}
@@ -846,6 +865,18 @@ const ParentComponent = ({
                       {/* Save */}
                       {languageConstants?.ExpressionBuilder_SaveButtonConstants}
                     </Button>
+                  </div>
+                  <div className="save-close">
+                    <Button
+                      onClick={handleSaveAndClose}
+                      className="btn-primary"
+                      disabled={suerveyIsPublished}
+                    >
+                      {
+                        languageConstants?.ExpressionBuilder_SaveAndCloseButton
+                      }
+                    </Button>
+                  </div>
                   </div>
                 </div>
               )}
