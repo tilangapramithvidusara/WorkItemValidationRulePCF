@@ -13,7 +13,8 @@ export const languageConstantsForCountry : any = {
         ExpressionBuilder_OperatorLabel: "Operator",
         ExpressionBuilder_ValueLabel: "Value",
         ExpressionBuilder_FieldsEmpty: "Fields cannot be empty",
-        ExpressionBuilder_ErrorOccured: "Error Occured!"
+        ExpressionBuilder_ErrorOccured: "Error Occured!",
+        ExpressionBuilder_SaveAndCloseButton: "Save & Close"
     },
     po: {
         saveButtonConstants: "Save",
