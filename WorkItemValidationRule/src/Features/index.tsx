@@ -24,6 +24,7 @@ import {
   updateDataRequest,
   closeTab,
   getUserRoles,
+  getWTSequenceState,
 } from "../XRMRequests/xrmRequests";
 import { dbConstants } from "../constants/dbConstants";
 import { normalConverter } from "../Utils/dbFormatToJson";
@@ -50,10 +51,10 @@ const ParentComponent = ({
   const [isLoadData, setIsLoadData] = useState<boolean>(false);
   const [_nestedRows, _setNestedRows] = useState<any>([]);
   const [isNested, setIsNested] = useState<any>();
-  // const [currentPossitionDetails, setCurrentPossitionDetails] = useState<any>();
-  const [currentPossitionDetails, setCurrentPossitionDetails] = useState<any>({
-    currentPosition: "question",
-  });
+  const [currentPossitionDetails, setCurrentPossitionDetails] = useState<any>();
+  // const [currentPossitionDetails, setCurrentPossitionDetails] = useState<any>({
+  //   currentPosition: "question",
+  // });
   const [_visibilityRulePrev, _setVisibilityRulePrev] = useState<any[]>([]);
   const [_enabledRulePrev, _setEnabledPrev] = useState<any[]>([]);
   const [_documentOutputRulePrev, _setDocumentOutputRulePrev] = useState<any[]>(
@@ -71,7 +72,7 @@ const ParentComponent = ({
   >([]);
   const [surveyList, setSurveyList] = useState<any[]>([]);
   const [selectedSurvey, setSelectedSurvey] = useState<any>();
-  const [localTest, setLocalTest] = useState<any>(true);
+  const [localTest, setLocalTest] = useState<any>(false);
   const [relationships, setRelationships] = useState<any[]>([]);
   const [initialLoadWithNoSurvey, setInitialLoadWithNoSurvey] =
     useState<any>(false);
@@ -393,8 +394,19 @@ const ParentComponent = ({
       getCurrentPublishedStatus();
       _getSurveyListByWorkItemId();
       _getWorkItemRelationshipByWorkitemId();
+      _getWTSequenceState();
     }
   }, [currentPossitionDetails]);
+
+  const _getWTSequenceState = async () => {
+    try {
+      const wiState = await getWTSequenceState();
+      console.log("stateCode", wiState)
+      if(wiState?.stateCode === 1) setSuerveyIsPublished(true)
+    } catch (e) {
+      console.log('WI Sequence State Error', e);
+    }
+  };
 
   const handleSectionRemove = (deleteSectionKey: any) => {
     if (deleteSectionKey) {
