@@ -13,7 +13,7 @@ declare global {
 export const loadAllQuestionsInSurvey = async (surveyTemplateId: any) => {
   try {    
     console.log('template id =========> ', surveyTemplateId);
-    const result = await window.parent.Xrm.WebApi.retrieveMultipleRecords("gyde_surveytemplatechaptersectionquestion", "?$select=gyde_name,gyde_answertype,_gyde_surveytemplatechaptersection_value,gyde_shortname,gyde_internalid&$filter= _gyde_surveytemplate_value eq " + surveyTemplateId);
+    const result = await window.parent.Xrm.WebApi.retrieveMultipleRecords("gyde_surveytemplatechaptersectionquestion", "?$select=gyde_name,gyde_answertype,statecode,_gyde_surveytemplatechaptersection_value,gyde_shortname,gyde_internalid&$filter= _gyde_surveytemplate_value eq " + surveyTemplateId);
     console.log("result ===========> ", result);
     console.log('result.entities=====> ', questionArraySample);
     return {
@@ -493,14 +493,11 @@ export const loadResourceString = async () : Promise<any> => {
   }
 
   export const closeTab = async () : Promise<any> =>{
-    var formContext =  window?.parent?.Xrm.Page;
-    // Check if the form context is available
-    if (formContext.ui && formContext.ui.close) {
-        formContext.ui.close();
-    } else {
-        console.error("formContext.ui.close is not available.");
+    const modal : any = parent.window.document.querySelector('section[id$="popupContainer"]');
+    if (modal) {
+      modal?.parentNode?.removeChild(modal);
     }
-}
+  }
 
 export const getUserRoles = async (): Promise<any> => {
   try {

@@ -48,7 +48,6 @@ const ParentComponent = ({
 
   // Get From XRM Requests
   const [sections, setSections] = useState<any[]>([]);
-  const [isLoadData, setIsLoadData] = useState<boolean>(false);
   const [_nestedRows, _setNestedRows] = useState<any>([]);
   const [isNested, setIsNested] = useState<any>();
   const [currentPossitionDetails, setCurrentPossitionDetails] = useState<any>();
@@ -129,11 +128,12 @@ const ParentComponent = ({
             sectionId: quesNme?._gyde_surveytemplatechaptersection_value,
             status: "A",
             internalId: quesNme?.gyde_internalid,
+            statecode: quesNme?.statecode
           };
       });
       formattedQuestionList &&
         formattedQuestionList.length &&
-        setQuestionList(formattedQuestionList?.filter((x: any) => x));
+        setQuestionList(formattedQuestionList?.filter((x: any) => x?.statecode === 0));
       setIsApiDataLoaded(false);
     } else {
       setQuestionList([]);
