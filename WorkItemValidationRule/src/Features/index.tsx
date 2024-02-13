@@ -489,6 +489,8 @@ const ParentComponent = ({
           let answerObject: any = {};
           let questionObject: any = {};
           console.log("selectedValue xxxxxxx ", selectedValue);
+          console.log("relField xxxxxxx ", relField);
+
           if (selectedValue?.questionType === "List") {
             console.log("RELATIONSHIPSSS", relationships);
             const relationshipSets = relationships?.map((set: any) => {
@@ -504,23 +506,21 @@ const ParentComponent = ({
             if (response?.data?.entities) {
               listAnswers = response?.data.entities.map((x: any) => ({
                 value: x.gyde_answervalue,
+                internalId: x.gyde_internalid
               }));
             }
 
-            if (listAnswers[0]?.value) {
+            if (relField?.value) {
               if (relField?.condition !== "con") {
                 answerObject = {
                   label: selectedValue?.label,
-                  value:
-                    listAnswers?.length > 0
-                      ? listAnswers[0]?.value
-                      : selectedValue?.value, // Set the value based on availability
+                  value: relField?.value, // Set the value based on availability
                   questionType: selectedValue?.questionType,
                   questionId: selectedValue?.questionId,
                   sectionId: selectedValue?.sectionId,
                   status: selectedValue?.status,
-                  internalId: selectedValue?.internalId,
-                  options: listAnswers[0]?.value,
+                  internalId: listAnswers?.find((opt: any) => opt?.value === relField?.value)?.internalId,
+                  options: listAnswers?.find((opt: any) => opt?.value === relField?.value)?.value,
                 };
               }
             }
@@ -764,7 +764,7 @@ const ParentComponent = ({
     );
     if (!deleteResult?.error) {
       await saveVisibilityData({});
-      _setNestedRows(null);
+      _setNestedRows([]);
     }
   };
 

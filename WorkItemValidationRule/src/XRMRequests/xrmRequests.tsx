@@ -519,13 +519,13 @@ export const getWTSequenceState = async (): Promise<any> => {
   try {
   if (currentPosition?.includes('gyde_surveytemplate')) {
     const paneIdObj = await window.parent.Xrm.App.sidePanes.getAllPanes()._collection;
-    const sequenceId = Object.keys(paneIdObj)[0]
-    const recordDetails = await window.parent.Xrm.WebApi.retrieveRecord("gyde_workitemtemplatesequence", sequenceId, "?$select=statecode,statuscode");
+    const sequenceId = Object.keys(paneIdObj)[0];
+    const recordDetails = await window.parent.Xrm.WebApi.retrieveRecord("gyde_workitemtemplatesequence", sequenceId, "?$select=gyde_ispartnerupdate");
     console.log("sequence record details", recordDetails);
-    stateCode.stateCode = recordDetails["statecode"]
+    stateCode.stateCode = recordDetails["gyde_ispartnerupdate"] === true ? 1 : 0;
   } else {
     const stateCodeFromXRM = await window.parent.Xrm.Page.ui._formContext.getAttribute("statecode").getValue();
-    stateCode.stateCode = stateCodeFromXRM
+    stateCode.stateCode = stateCodeFromXRM;
   }
   console.log("CURRR POS", currentPosition);
   console.log("State Code", stateCode);
@@ -534,3 +534,4 @@ export const getWTSequenceState = async (): Promise<any> => {
   console.log("GetWIError", e)
 }
 }
+
