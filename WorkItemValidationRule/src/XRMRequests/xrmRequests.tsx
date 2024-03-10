@@ -65,10 +65,11 @@ export const getWorkItemId = async() => {
     const currentPosition = await window.parent.Xrm.Page.ui._formContext._entityName;
     console.log("CURRR POS", currentPosition);
     let workItemId
-    if (currentPosition?.includes('gyde_surveytemplate')) {
+    if (currentPosition?.includes('gyde_surveytemplate') || currentPosition?.includes('gyde_workitemtemplate')) {
       const paneIdObj = await window.parent.Xrm.App.sidePanes.getAllPanes()._collection;
       const sequenceId = Object.keys(paneIdObj)[0]
       const res = await getWorkItemIdBySequenceId(sequenceId);
+      console.log("sequence result", res)
       workItemId = res?.workitemId;
     } else {
       workItemId = await window.parent.Xrm.Page.ui._formContext.data.entity.getId().replace("{", "").replace("}", "");
@@ -248,6 +249,35 @@ export const createRelationshipForWI = async (workitemId: any, updateRecordDetai
   }
 }
 
+export const updateRelationshipForWI = async (workitemId?: any, updateRecordDetails?: any, reletedSurveyItemId?: string): Promise<any> => {
+  try {
+    const updatedRecordResults: any[] = [];
+    const workitemDetails = await window.parent.Xrm.WebApi.retrieveRecord("gyde_surveyworkitem", workitemId);
+    console.log("Updating WI", workitemDetails)
+    updateRecordDetails?.forEach(async (rcd: any) => {
+      let record: any = {};
+      // record["gyde_surveyworkitem@odata.bind"] = `/gyde_surveyworkitems(${workitemId})`; // Lookup
+      // record["gyde_relatedsurveyitemid"] = rcd?.internalId;
+      // record["gyde_itemtype"] = dbConstants?.common?.item_type_question;
+      record["gyde_isusedincreationrule"] = rcd?.usedInCreationRule === "false" ? false : true;
+      // record["gyde_iscopydesignnotes"] = false
+      // record["gyde_isincludeindevopsoutput"] = false
+      // record["gyde_name"] = `${rcd?.value} - ${workitemDetails?.gyde_title}`
+
+      console.log("SAVED WI record", record)
+      const result = await window.parent.Xrm.WebApi.updateRecord("gyde_surveyworkitemrelatedsurveyitem", reletedSurveyItemId, record);
+      console.log("result", result)
+      updatedRecordResults.push(result);
+      console.log("result workitem relationship", result)
+    });
+    return { error: false, data: updatedRecordResults }
+
+  } catch (e) {
+    console.log("Create Work Item Relationship Error", e);
+    return { error: true, data: {} }
+  }
+}
+
 
 export const getSurveyListByWorkItemId = async (workItemId: any): Promise<any> => {
   try {
@@ -309,6 +339,7 @@ export const getSurveyListByWorkItemId = async (workItemId: any): Promise<any> =
 
 export const getWorkItemIdBySequenceId = async (sequenceId: any): Promise<any> => {
   try {
+    console.log("Error occured hereeee")
     let fetchXml = `?fetchXml=<fetch top="50">
     <entity name="gyde_workitemtemplatesequence">
       <filter>
@@ -515,23 +546,40 @@ export const getUserRoles = async (): Promise<any> => {
 
 export const getWTSequenceState = async (): Promise<any> => {
   const currentPosition = await window.parent.Xrm.Page.ui._formContext._entityName;
-  let stateCode : any = {}
+  let stateCode: any = {};
   try {
-  if (currentPosition?.includes('gyde_surveytemplate')) {
-    const paneIdObj = await window.parent.Xrm.App.sidePanes.getAllPanes()._collection;
-    const sequenceId = Object.keys(paneIdObj)[0];
-    const recordDetails = await window.parent.Xrm.WebApi.retrieveRecord("gyde_workitemtemplatesequence", sequenceId, "?$select=gyde_ispartnerupdate");
-    console.log("sequence record details", recordDetails);
-    stateCode.stateCode = recordDetails["gyde_ispartnerupdate"] === true ? 1 : 0;
-  } else {
-    const stateCodeFromXRM = await window.parent.Xrm.Page.ui._formContext.getAttribute("statecode").getValue();
-    stateCode.stateCode = stateCodeFromXRM;
+    if (currentPosition?.includes('gyde_surveytemplate')) {
+      const paneIdObj = await window.parent.Xrm.App.sidePanes.getAllPanes()._collection;
+      const sequenceId = Object.keys(paneIdObj)[0];
+      const recordDetails = await window.parent.Xrm.WebApi.retrieveRecord(
+        'gyde_workitemtemplatesequence',
+        sequenceId,
+        '?$select=gyde_ispartnerupdate'
+      );
+      console.log('sequence record details', recordDetails);
+      stateCode.stateCode = recordDetails['gyde_ispartnerupdate'] === true ? 0 : 1;
+    } else {
+      const stateCodeFromXRM = await window.parent.Xrm.Page.ui._formContext
+        .getAttribute('statecode')
+        .getValue();
+      stateCode.stateCode = stateCodeFromXRM;
+    }
+    console.log('CURRR POS', currentPosition);
+    console.log('State Code', stateCode);
+    return stateCode;
+  } catch (e) {
+    console.log('GetWIError', e);
   }
-  console.log("CURRR POS", currentPosition);
-  console.log("State Code", stateCode);
-  return stateCode;
-} catch(e){
-  console.log("GetWIError", e)
-}
-}
+};
 
+export const getUrl = async (): Promise<any> => {
+ 
+  try {
+    const clientUrl = await window.parent.Xrm.Page.context.getClientUrl();
+    console.log("Client URL", clientUrl);
+    return clientUrl;
+
+  } catch (e) {
+    console.log('GetWIError', e);
+  }
+};

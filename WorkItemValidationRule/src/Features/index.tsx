@@ -25,6 +25,8 @@ import {
   closeTab,
   getUserRoles,
   getWTSequenceState,
+  updateRelationshipForWI,
+  getUrl,
 } from "../XRMRequests/xrmRequests";
 import { dbConstants } from "../constants/dbConstants";
 import { normalConverter } from "../Utils/dbFormatToJson";
@@ -71,6 +73,8 @@ const ParentComponent = ({
   >([]);
   const [surveyList, setSurveyList] = useState<any[]>([]);
   const [selectedSurvey, setSelectedSurvey] = useState<any>();
+  const [currentPosition, setCurrentPossition] = useState<any>();
+
   const [localTest, setLocalTest] = useState<any>(false);
   const [relationships, setRelationships] = useState<any[]>([]);
   const [initialLoadWithNoSurvey, setInitialLoadWithNoSurvey] =
@@ -381,6 +385,11 @@ const ParentComponent = ({
       currentPossitionDetails?.id
     );
     console.log("RelationShipsss", data);
+    const isSection = data?.some((rel: any) => rel["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] === 'Section')
+    const isChapter = data?.some((rel: any) => rel["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] === 'Chapter')
+    console.log("isSection", isSection)
+    console.log("isChapter", isChapter)
+    setCurrentPossition(isSection ? 'section' : isChapter ? 'chapter' : 'question');
     if (!data?.error) {
       setRelationships(data);
     }
@@ -400,9 +409,12 @@ const ParentComponent = ({
 
   const _getWTSequenceState = async () => {
     try {
-      const wiState = await getWTSequenceState();
-      console.log("stateCode", wiState)
-      if(wiState?.stateCode === 1) setSuerveyIsPublished(true)
+      const url = await getUrl();
+      if(url && url.includes("partner")) {
+        const wiState = await getWTSequenceState();
+        console.log("stateCode", wiState);
+        if(wiState?.stateCode === 1) setSuerveyIsPublished(true)
+      }
     } catch (e) {
       console.log('WI Sequence State Error', e);
     }
@@ -471,7 +483,7 @@ const ParentComponent = ({
         ) {
           const extractedString = nameLbl[0].trim();
           console.log("extractedString", extractedString);
-          return extractedString;
+          return {value: extractedString, releatedSurveyItemId: rela?.gyde_surveyworkitemrelatedsurveyitemid};
         }
       })
       ?.filter((x) => x);
@@ -525,7 +537,7 @@ const ParentComponent = ({
               }
             }
             if (
-              !existanceRelationshipIds?.includes(selectedValue?.questionId)
+              !existanceRelationshipIds?.some((x) => x?.value === selectedValue?.value)
             ) {
               questionObject = {
                 label: selectedValue?.label,
@@ -535,9 +547,28 @@ const ParentComponent = ({
                 sectionId: selectedValue?.sectionId,
                 status: selectedValue?.status,
                 internalId: selectedValue?.internalId,
-                usedInCreationRule:
-                  relField?.condition === "con" ? true : "false",
+                usedInCreationRule: relField?.condition !== "con" && relField?.value ? "false" : true,
+                  // relField?.condition === "con" ? true : "false",
               };
+            } else {
+              console.log("Updating")
+              if(existanceRelationshipIds?.some((x) => x?.value === selectedValue?.value)) {
+                const releatedSurveyItemId = existanceRelationshipIds?.find((x) => x?.value === selectedValue?.value)?.releatedSurveyItemId
+                console.log("Updating", releatedSurveyItemId)
+
+                const updatedObj = {
+                  // label: selectedValue?.label,
+                  // value: selectedValue?.label, // Set the value based on availability
+                  // questionType: selectedValue?.questionType,
+                  // questionId: selectedValue?.questionId,
+                  // sectionId: selectedValue?.sectionId,
+                  // status: selectedValue?.status,
+                  // internalId: selectedValue?.internalId,
+                  usedInCreationRule: "true",
+                };
+                await updateRelationshipForWI(currentPossitionDetails?.id, [updatedObj], releatedSurveyItemId)
+              }
+           
             }
 
             if (Object.keys(answerObject)?.length !== 0) {
@@ -590,6 +621,36 @@ const ParentComponent = ({
           relat?.gyde_surveyworkitemrelatedsurveyitemid,
           record
         );
+      }
+    }
+
+    if (
+      existanceRelationshipIds &&
+      existanceRelationshipIds?.length
+    ) {
+      let record: any = {};
+      for (const relat of existanceRelationshipIds) {
+        let selectedValue: any = questionList?.find(
+          (x: { value: any }) => x?.value === relat?.value
+        );
+        let isAnswerAvailable = false
+        for (const sec of _nestedRows) {
+          const key = Object.keys(sec)[0];
+          const fields = JSON.parse(JSON.stringify(sec[key].fields));
+          console.log("Existance Fields", fields);
+          isAnswerAvailable = fields?.some((ques: any) => ques?.field === selectedValue?.value && !ques?.value);
+          console.log("isAnswerAvailable Fields", isAnswerAvailable);
+        }
+
+        if ((selectedValue?.questionType === "List" && isAnswerAvailable) || !_nestedRows?.length) {
+          record["gyde_isusedincreationrule"] = true;
+          await updateDataRequest(
+            dbConstants?.common?.gyde_surveyworkitemrelatedsurveyitem,
+            relat?.releatedSurveyItemId,
+            record
+          );
+        }
+       
       }
     }
     setTimeout(async () => {
@@ -665,15 +726,17 @@ const ParentComponent = ({
     //       }
     //     }
     // })?.map(x => x?.gyde_surveyworkitemrelatedsurveyitemid);
-    deleteRelationshipIds = relationships
+
+      deleteRelationshipIds = relationships
       ?.filter(
         (y) =>
-          y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] ===
-            "Question" ||
+          // y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] ===
+          //   "Question" ||
           y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] ===
             "Answer"
       )
       ?.map((x) => x?.gyde_surveyworkitemrelatedsurveyitemid);
+    
     console.log("deleteRelationshipIds 1", deleteRelationshipIds);
     // if (deleteRelationshipIds?.length) {
     //   console.log("deleteRelationshipIds 2", deleteRelationshipIds)
@@ -748,24 +811,24 @@ const ParentComponent = ({
   }, [selectedSurvey]);
 
   const clearItems = async (): Promise<void> => {
-    const deleteRelationshipIds = relationships
-      ?.filter(
-        (y) =>
-          y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] ===
-            "Question" ||
-          y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] ===
-            "Answer"
-      )
-      ?.map((x) => x?.gyde_surveyworkitemrelatedsurveyitemid);
-    console.log("deleteRelationshipIds 1", deleteRelationshipIds);
-    const deleteResult = await xrmDeleteRequest(
-      dbConstants?.common?.gyde_surveyworkitemrelatedsurveyitem,
-      deleteRelationshipIds
-    );
-    if (!deleteResult?.error) {
+    // const deleteRelationshipIds = relationships
+    //   ?.filter(
+    //     (y) =>
+    //       y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] ===
+    //         "Question" ||
+    //       y["gyde_itemtype@OData.Community.Display.V1.FormattedValue"] ===
+    //         "Answer"
+    //   )
+    //   ?.map((x) => x?.gyde_surveyworkitemrelatedsurveyitemid);
+    // console.log("deleteRelationshipIds 1", deleteRelationshipIds);
+    // const deleteResult = await xrmDeleteRequest(
+    //   dbConstants?.common?.gyde_surveyworkitemrelatedsurveyitem,
+    //   deleteRelationshipIds
+    // );
+    // if (!deleteResult?.error) {
       await saveVisibilityData({});
       _setNestedRows([]);
-    }
+    // }
   };
 
   const showPromiseConfirm: any = async () => {
