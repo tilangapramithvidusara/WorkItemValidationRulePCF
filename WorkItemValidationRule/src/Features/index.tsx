@@ -414,6 +414,8 @@ console.log("initak Loadng");
       _getSurveyListByWorkItemId();
       _getWorkItemRelationshipByWorkitemId();
       _getWTSequenceState();
+      const data =  executeRequest(currentPossitionDetails?.id? currentPossitionDetails?.id : "")
+   console.log("curretData",data,isPartner,env);
     }
   }, [currentPossitionDetails]);
 
@@ -861,11 +863,11 @@ console.log("initak Loadng");
     await closeTab();
   };
   
-  useEffect(()=> {
-   const data =  executeRequest(currentPossitionDetails?.id? currentPossitionDetails?.id : "")
-   console.log("curretData",data,isPartner,env);
+  // useEffect(()=> {
+  //  const data =  executeRequest(currentPossitionDetails?.id? currentPossitionDetails?.id : "")
+  //  console.log("curretData",data,isPartner,env);
    
-  },[])
+  // },[])
   return (
     <div>
       {contextHolder}
