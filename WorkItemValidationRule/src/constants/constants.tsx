@@ -18,3 +18,4 @@ export const constants = {
             }
         }
 };
+export const checkPartnerKey = 'partner'

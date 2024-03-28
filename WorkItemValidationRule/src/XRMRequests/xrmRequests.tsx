@@ -583,3 +583,44 @@ export const getUrl = async (): Promise<any> => {
     console.log('GetWIError', e);
   }
 };
+
+//new request
+export const executeRequest = async(workItemTemplateId: string) => {
+  try {
+    var executePayload = {
+      // Parameters
+     workItemTemplateId: "995cbf3d-fdeb-ee11-a1fe-002248c87a5d", // Edm.String
+      
+      getMetadata: function () {
+        return {
+          boundParameter: null,
+          parameterTypes: {
+            workItemTemplateId: { typeName: "Edm.String", structuralProperty: 1 }
+          },
+          operationType: 1,
+          operationName: "gyde_GetSurveyTemplateAndSurveyQuestionFromWorkItemTemplate"
+        };
+      }
+    };
+      
+    const response = await parent.window.Xrm.WebApi.execute(executePayload);
+    
+    if (response.ok) {
+      const responseBody = await response.json();
+      const result = responseBody;
+      console.log(result);
+      // Return Type: mscrm.gyde_GetSurveyTemplateAndSurveyQuestionFromWorkItemTemplateResponse
+      // Output Parameters
+      const surveytemplatelist = result["surveytemplatelist"]; // Edm.String
+      console.log('surveytemplatelist * ==> ', surveytemplatelist)
+      return surveytemplatelist;
+    } else {
+      throw new Error('Response not OK');
+    }
+  } catch (error: any) {
+    console.log('error execute ==> ', error.message);
+    return [];
+  }
+}
+
+

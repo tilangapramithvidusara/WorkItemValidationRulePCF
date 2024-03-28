@@ -12,7 +12,8 @@ interface SectionProps {
   selectedSurvey: any;
   _nestedRows: any;
   handleSectionRemove: any;
-  languageConstants: any
+  languageConstants: any;
+  isPartner:Boolean;
 }
 
 function PickServeyContainer({
@@ -21,7 +22,8 @@ function PickServeyContainer({
   selectedSurvey,
   _nestedRows,
   handleSectionRemove,
-  languageConstants
+  languageConstants,
+  isPartner
 }: SectionProps) {
   
   const onChange = (value: string) => {
@@ -67,7 +69,7 @@ function PickServeyContainer({
         })}
           style={{ width: 200 }}
           value={selectedSurvey ? selectedSurvey : null} 
-          disabled={_nestedRows?.length === 1}
+          disabled={isPartner ? false :_nestedRows?.length === 1}
       />
       </div>
     

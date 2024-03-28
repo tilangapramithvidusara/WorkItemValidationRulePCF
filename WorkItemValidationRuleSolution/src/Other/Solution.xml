@@ -8,9 +8,9 @@
       <LocalizedName description="WorkItemValidationRuleSolution" languagecode="1033" />
     </LocalizedNames>
     <Descriptions />
-    <Version>1.1.3.35</Version>
+    <Version>1.1.3.50</Version>
     <!-- Solution Package Type: Unmanaged(0)/Managed(1)/Both(2)-->
-    <Managed>0</Managed>
+    <Managed>1</Managed>
     <Publisher>
       <!-- Unique Publisher Name of Cds Solution -->
       <UniqueName>Gyde365</UniqueName>

@@ -318,6 +318,20 @@ const hasNullFields = (obj: any) => {
   });
 }
 
+const hasMismatch = (firstArray: any[], secondArray: any, firstKey: string, secondKey: string) => firstArray.some((firstElement: any) => !secondArray.some((secondElement: any) => secondElement?.[secondKey] === firstElement?.[firstKey]));
+
+const checkQuestionMissmatch = (sections: any[], _nestedRows: any[], selectedSurvey: any) => {
+  if (!sections || sections.length === 0) return false;
+
+  for (const section of sections) {
+    const rowArray = _nestedRows?.find(x => x[section.key])?.[section.key]?.fields;
+    if (hasMismatch(rowArray, selectedSurvey?.SurveyQuestions, 'field', 'Name')) {
+      return true;
+    }
+  }
+  
+  return false;
+};
 export {
   updateByParentId,
   getNearestParentByItems,
@@ -330,5 +344,6 @@ export {
   getAllChildrenIDs,
   getNestedParentLevel,
   _updateExpressionByParentId,
-  hasNullFields
+  hasNullFields,
+  checkQuestionMissmatch
 };

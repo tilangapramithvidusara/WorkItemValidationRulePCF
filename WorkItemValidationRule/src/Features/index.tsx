@@ -27,6 +27,7 @@ import {
   getWTSequenceState,
   updateRelationshipForWI,
   getUrl,
+  executeRequest,
 } from "../XRMRequests/xrmRequests";
 import { dbConstants } from "../constants/dbConstants";
 import { normalConverter } from "../Utils/dbFormatToJson";
@@ -35,6 +36,7 @@ import PickServeyContainer from "./pickServeyContainer";
 import { languageConstantsForCountry } from "../constants/languageConstants";
 import countryMappedConfigs from "../configs/countryMappedConfigs";
 import { ExclamationCircleFilled } from "@ant-design/icons";
+import { checkPartnerKey } from "../constants/constants";
 const { confirm } = Modal;
 
 const ParentComponent = ({
@@ -89,6 +91,14 @@ const ParentComponent = ({
     nestingLevelValidation: true,
   });
   const [suerveyIsPublished, setSuerveyIsPublished] = useState<boolean>(false);
+
+  const [env, setEnv] = useState<string>(parent.window.Xrm.Utility.getGlobalContext().getClientUrl());
+  const [isPartner,setIsPartner] = useState <boolean>(env?.includes(checkPartnerKey))
+console.log("initak Loadng");
+
+  useEffect(()=> {
+   setIsPartner(env?.includes(checkPartnerKey))
+  },[env])
 
   let addComponent = () => {
     setSections([
@@ -851,6 +861,11 @@ const ParentComponent = ({
     await closeTab();
   };
   
+  useEffect(()=> {
+   const data =  executeRequest("")
+   console.log("curretData",data,isPartner,env);
+   
+  },[])
   return (
     <div>
       {contextHolder}
@@ -890,6 +905,7 @@ const ParentComponent = ({
                     _nestedRows={_nestedRows}
                     handleSectionRemove={handleSectionRemove}
                     languageConstants={languageConstants}
+                    isPartner = {isPartner}
                   />
                 </div>
               )}

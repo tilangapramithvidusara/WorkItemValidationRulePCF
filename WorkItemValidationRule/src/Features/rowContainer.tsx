@@ -447,6 +447,8 @@ const RowContainer: React.FC<TableRowProps> = ({
       ?.find((x: any[]) => x[sectionLevel])
       ?.[sectionLevel]?.fields?.map((lvl: any) => lvl?.condition);
     console.log("ISCONTAIN", isContainInclude);
+
+    //nested row 1
     console.log(
       "ISCONTAIN _nestedRows",
       _nestedRows?.find((x: any[]) => x[sectionLevel])?.[sectionLevel]?.fields

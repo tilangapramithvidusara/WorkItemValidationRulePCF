@@ -28,7 +28,7 @@
   -->
 
   <PropertyGroup>
-    <SolutionPackageType>Unmanaged</SolutionPackageType>
+    <SolutionPackageType>Managed</SolutionPackageType>
     <SolutionPackageEnableLocalization>false</SolutionPackageEnableLocalization>
   </PropertyGroup>
 
