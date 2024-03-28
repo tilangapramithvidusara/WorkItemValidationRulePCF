@@ -587,9 +587,11 @@ export const getUrl = async (): Promise<any> => {
 //new request
 export const executeRequest = async(workItemTemplateId: string) => {
   try {
+    console.log("workItemTemplateId",workItemTemplateId);
+    
     var executePayload = {
       // Parameters
-     workItemTemplateId: "995cbf3d-fdeb-ee11-a1fe-002248c87a5d", // Edm.String
+     workItemTemplateId: workItemTemplateId, // Edm.String
       
       getMetadata: function () {
         return {

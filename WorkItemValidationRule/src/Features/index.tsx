@@ -367,6 +367,13 @@ console.log("initak Loadng");
     if (data?.isPublished) setSuerveyIsPublished(data?.isPublished);
   };
 
+  const getSurveyListByPartner = () => {
+    console.log("parnterCalling",currentPossitionDetails?.id);
+    
+    const data =   executeRequest(currentPossitionDetails?.id)
+ 
+    console.log("curretData",data,isPartner,env);
+  }
   const _getSurveyListByWorkItemId = async () => {
     const { data = [] } = await getSurveyListByWorkItemId(
       currentPossitionDetails?.id
@@ -414,6 +421,7 @@ console.log("initak Loadng");
       _getSurveyListByWorkItemId();
       _getWorkItemRelationshipByWorkitemId();
       _getWTSequenceState();
+      getSurveyListByPartner();
     }
   }, [currentPossitionDetails]);
 
@@ -862,8 +870,7 @@ console.log("initak Loadng");
   };
   
   useEffect(()=> {
-   const data =  executeRequest("")
-   console.log("curretData",data,isPartner,env);
+ 
    
   },[])
   return (
